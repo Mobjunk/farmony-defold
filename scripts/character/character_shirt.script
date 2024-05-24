@@ -26,6 +26,14 @@ go.property("sailor_bow_sword", resource.tile_source("/assets/characters/sword/c
 go.property("sporty_sword", resource.tile_source("/assets/characters/sword/clothes/body/sporty_sword.tilesource"))
 go.property("suit_sword", resource.tile_source("/assets/characters/sword/clothes/body/suit_sword.tilesource"))
 
+go.property("default_axe", resource.tile_source("/assets/characters/axe/clothes/body/basic_axe.tilesource"))
+go.property("floral_axe", resource.tile_source("/assets/characters/axe/clothes/body/floral_axe.tilesource"))
+go.property("overall_axe", resource.tile_source("/assets/characters/axe/clothes/body/overall_axe.tilesource"))
+go.property("sailor_axe", resource.tile_source("/assets/characters/axe/clothes/body/sailor_axe.tilesource"))
+go.property("sailor_bow_axe", resource.tile_source("/assets/characters/axe/clothes/body/sailor_bow_axe.tilesource"))
+go.property("sporty_axe", resource.tile_source("/assets/characters/axe/clothes/body/sporty_axe.tilesource"))
+go.property("suit_axe", resource.tile_source("/assets/characters/axe/clothes/body/suit_axe.tilesource"))
+
 local function get_shirt_style(self)
     local styles = {
         self.floral,
@@ -49,6 +57,16 @@ local function get_tool_shirt_style(self, action)
             self.suit_pickaxe
         }
         return styles[character_looks.style[2]] or self.default_pickaxe
+    elseif action == 'axe' then
+        local styles = {
+            self.floral_axe,
+            self.overall_axe,
+            self.sailor_axe,
+            self.sailor_bow_axe,
+            self.sporty_axe,
+            self.suit_axe
+        }
+        return styles[character_looks.style[2]] or self.default_axe
     elseif action == 'sword' then
         local styles = {
             self.floral_sword,
@@ -70,8 +88,12 @@ function init(self)
 end
 
 function on_input(self, action_id, action)
-	if (action_id == hash("pickaxe") or action_id == hash('axe')) and action.released then
+	if action_id == hash("pickaxe") and action.released then
 		character_animation.start_animation("#shirt", get_tool_shirt_style(self, 'pickaxe'))
+	end
+
+	if action_id == hash('axe') and action.released then
+		character_animation.start_animation("#shirt", get_tool_shirt_style(self, 'axe'))
 	end
 
 	if action_id == hash("sword") and action.released then

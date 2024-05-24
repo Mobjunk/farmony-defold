@@ -62,6 +62,7 @@ local function get_hair_style(self)
 end
 
 local function get_tool_hair_style(self, action)
+    print('action',action)
     if action == 'pickaxe' then
         local styles = {
             self.braids_pickaxe,
