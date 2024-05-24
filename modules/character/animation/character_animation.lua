@@ -39,25 +39,27 @@ function character_animation.new()
 
 		if not input then
 			if character_info.direction == 'right' then
-				anim = animations["idle_right"][1]
+				anim = animations["idle_right"][instance.get_color_index(url)]
 			elseif character_info.direction == 'left' then
-				anim = animations["idle_left"][1]
+				anim = animations["idle_left"][instance.get_color_index(url)]
 			elseif character_info.direction == 'up' then
-				anim = animations["idle_up"][1]
+				anim = animations["idle_up"][instance.get_color_index(url)]
 			elseif character_info.direction == 'down' then
-				anim = animations["idle_down"][1]
+				anim = animations["idle_down"][instance.get_color_index(url)]
 			end
 		else
 			if direction.x > 0 then
-				anim = animations["walk_right"][1]
+				anim = animations["walk_right"][instance.get_color_index(url)]
 			elseif direction.x < 0 then
-				anim = animations["walk_left"][1]
+				anim = animations["walk_left"][instance.get_color_index(url)]
 			elseif direction.y > 0 then
-				anim = animations["walk_up"][1]
+				anim = animations["walk_up"][instance.get_color_index(url)]
 			elseif direction.y < 0 then
-				anim = animations["walk_down"][1]
+				anim = animations["walk_down"][instance.get_color_index(url)]
 			end
 		end
+
+		--print('anim',anim)
 
 		if anim == instance.current_animation and input then
 			return;
@@ -77,6 +79,21 @@ function character_animation.new()
 		if message_id == hash("animation_done") then
 			instance.reset_animation(url, default, true)
 		end
+	end
+
+	function instance.get_color_index(url)
+		if url == '#hair' then
+			return 6
+		elseif url == '#eyes' then
+			return 5
+		elseif url == '#shoes' then
+			return 4
+		elseif url == '#pants' then
+			return 3
+		elseif url == '#shirt' then
+			return 2
+		end
+		return 1
 	end
 
 	return instance
