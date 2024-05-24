@@ -11,11 +11,11 @@ function init(self)
 
 	local interaction_name = "idle"
 	local startDown = 1
-	local startUp = 71
-	local startRight = 141
-	local startLeft = 211
+	local startUp = 46
+	local startRight = 91
+	local startLeft = 136
 	local totalFrames = 5
-	for index = 0, 13, 1 do
+	for index = 0, 8, 1 do
 		local test =  [[
 			animations {
 				id: "]] .. interaction_name .. [[_down_]] .. index .. [["
@@ -62,11 +62,11 @@ function init(self)
 	end
 
 	startDown = 1
-	startUp = 113
-	startRight = 225
-	startLeft = 337
+	startUp = 73
+	startRight = 145
+	startLeft = 217
 	
-	for index = 0, 13, 1 do
+	for index = 0, 8, 1 do
 		local test =  [[
 			animations {
 				id: "idle_down_]] .. index .. [["
