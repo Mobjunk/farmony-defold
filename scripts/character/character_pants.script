@@ -1,0 +1,36 @@
+local character_animation_module = require('modules.character.animation.character_animation')
+local character_animation = character_animation_module.new()
+
+go.property("default", resource.tile_source("/assets/characters/walk/clothes/pants/pants.tilesource"))
+go.property("pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/pants/pants_pickaxe.tilesource"))
+
+function init(self)
+	print(msg.url())
+	msg.post(".", "acquire_input_focus")
+end
+
+function final(self)
+end
+
+function update(self, dt)
+
+end
+
+function fixed_update(self, dt)
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("pickaxe") and action.released then
+		character_animation.start_animation("#pants", self.pickaxe)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash('reset_animation') then
+		character_animation.reset_animation("#pants", self.default, true)
+	elseif message_id == hash("animate") then
+		character_animation.play_animation("#pants", message.direction)
+	end
+
+	character_animation.on_message(message_id, "#pants", self.default)
+end

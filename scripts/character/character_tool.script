@@ -1,4 +1,5 @@
-local character_animation = require('modules.character.animation.character_animation')
+local character_animation_module = require('modules.character.animation.character_animation')
+local character_animation = character_animation_module.new()
 
 go.property("default", resource.tile_source("/assets/characters/default_tool.tilesource"))
 go.property("pickaxe", resource.tile_source("/assets/characters/pickaxe/pickaxe.tilesource"))
