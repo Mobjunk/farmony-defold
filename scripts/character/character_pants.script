@@ -1,12 +1,41 @@
+local character_looks = require('modules.character.character_looks')
 local character_animation_module = require('modules.character.animation.character_animation')
 local character_animation = character_animation_module.new()
 
 go.property("default", resource.tile_source("/assets/characters/walk/clothes/pants/pants.tilesource"))
-go.property("pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/pants/pants_pickaxe.tilesource"))
+go.property("suit", resource.tile_source("/assets/characters/walk/clothes/pants/pants_suit.tilesource"))
+go.property("skirt", resource.tile_source("/assets/characters/walk/clothes/pants/skirt.tilesource"))
+
+go.property("default_pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/pants/pants_pickaxe.tilesource"))
+go.property("suit_pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/pants/pants_suit_pickaxe.tilesource"))
+go.property("skirt_pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/pants/skirt_pickaxe.tilesource"))
+
+local function get_pants_style(self)
+    local styles = {
+        self.skirt,
+        self.suit
+    }
+    return styles[character_looks.style[3]] or self.default
+end
+
+local function get_tool_pants_style(self, action)
+    if action == 'pickaxe' then
+        local styles = {
+            self.skirt_pickaxe,
+            self.suit_pickaxe
+        }
+		local style_index = character_looks.style[3]
+		if style_index >= 1 and style_index <= #styles then
+			return styles[style_index]
+		end
+    end
+    return self.default_pickaxe
+end
 
 function init(self)
 	print(msg.url())
 	msg.post(".", "acquire_input_focus")
+	character_animation.reset_animation("#pants", get_pants_style(self), true)
 end
 
 function final(self)
@@ -21,16 +50,16 @@ end
 
 function on_input(self, action_id, action)
 	if action_id == hash("pickaxe") and action.released then
-		character_animation.start_animation("#pants", self.pickaxe)
+		character_animation.start_animation("#pants", get_tool_pants_style(self, 'pickaxe'))
 	end
 end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash('reset_animation') then
-		character_animation.reset_animation("#pants", self.default, true)
+		character_animation.reset_animation("#pants", get_pants_style(self), true)
 	elseif message_id == hash("animate") then
 		character_animation.play_animation("#pants", message.direction)
 	end
 
-	character_animation.on_message(message_id, "#pants", self.default)
+	character_animation.on_message(message_id, "#pants", get_pants_style(self))
 end

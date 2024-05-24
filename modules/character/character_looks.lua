@@ -18,10 +18,12 @@ character_looks.colors = {
 
 character_looks.hair_style = 0
 character_looks.shirt_style = 0
+character_looks.pants_style = 0
 
 character_looks.style = {
     character_looks.hair_style,
-    character_looks.shirt_style
+    character_looks.shirt_style,
+    character_looks.pants_style
 }
 
 return character_looks;

@@ -10,7 +10,7 @@ go.property("sailor_bow", resource.tile_source("/assets/characters/walk/clothes/
 go.property("sporty", resource.tile_source("/assets/characters/walk/clothes/body/sporty.tilesource"))
 go.property("suit", resource.tile_source("/assets/characters/walk/clothes/body/suit.tilesource"))
 
-go.property("pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/body/basic_pickaxe.tilesource"))
+go.property("default_pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/body/basic_pickaxe.tilesource"))
 go.property("floral_pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/body/floral_pickaxe.tilesource"))
 go.property("overall_pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/body/overall_pickaxe.tilesource"))
 go.property("sailor_pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/body/sailor_pickaxe.tilesource"))

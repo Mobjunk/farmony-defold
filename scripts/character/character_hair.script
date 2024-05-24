@@ -52,7 +52,10 @@ local function get_tool_hair_style(self, action)
             self.spacebuns_pickaxe,
             self.wavy_pickaxe
         }
-        return styles[character_looks.style[1]] or self.default_pickaxe
+        local style_index = character_looks.style[1]
+        if style_index >= 1 and style_index <= #styles then
+            return styles[style_index]
+        end
     end
     return self.default_pickaxe
 end
