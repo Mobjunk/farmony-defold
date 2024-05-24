@@ -59,8 +59,9 @@ function character_animation.new()
 			end
 		end
 
-		--print('anim',anim)
-
+		if url == '#hair' then
+			print('anim on '..url..'',anim)
+		end
 		if anim == instance.current_animation and input then
 			return;
 		end

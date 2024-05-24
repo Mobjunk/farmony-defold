@@ -4,18 +4,23 @@ local character_animation = character_animation_module.new()
 
 go.property("default", resource.tile_source("/assets/characters/walk/character.tilesource"))
 go.property("pickaxe", resource.tile_source("/assets/characters/pickaxe/character_pickaxe.tilesource"))
+go.property("sword", resource.tile_source("/assets/characters/sword/character_sword.tilesource"))
 
 local speed = 150
 
 function init(self)
 
 	local interaction_name = "idle"
+	--[[local startDown = 1
+	local startUp = 41
+	local startRight = 81
+	local startLeft = 121]]
 	local startDown = 1
-	local startUp = 46
-	local startRight = 91
-	local startLeft = 136
-	local totalFrames = 5
-	for index = 0, 8, 1 do
+	local startUp = 57
+	local startRight = 113
+	local startLeft = 169
+	local totalFrames = 4
+	for index = 0, 9, 1 do
 		local test =  [[
 			animations {
 				id: "]] .. interaction_name .. [[_down_]] .. index .. [["
@@ -59,93 +64,6 @@ function init(self)
 		startUp = startUp + totalFrames
 		startRight = startRight + totalFrames
 		startLeft = startLeft + totalFrames
-	end
-
-	startDown = 1
-	startUp = 73
-	startRight = 145
-	startLeft = 217
-	
-	for index = 0, 8, 1 do
-		local test =  [[
-			animations {
-				id: "idle_down_]] .. index .. [["
-				start_tile: ]] .. startDown .. [[
-				end_tile: ]] .. startDown .. [[
-				playback: PLAYBACK_LOOP_FORWARD
-				fps: 8
-				flip_horizontal: 0
-				flip_vertical: 0
-			}
-			animations {
-				id: "idle_left_]] .. index .. [["
-				start_tile: ]] .. startLeft .. [[
-				end_tile: ]] .. startLeft .. [[
-				playback: PLAYBACK_LOOP_FORWARD
-				fps: 8
-				flip_horizontal: 0
-				flip_vertical: 0
-			}
-			animations {
-				id: "idle_right_]] .. index .. [["
-				start_tile: ]] .. startRight .. [[
-				end_tile: ]] .. startRight .. [[
-				playback: PLAYBACK_LOOP_FORWARD
-				fps: 8
-				flip_horizontal: 0
-				flip_vertical: 0
-			}
-			animations {
-				id: "idle_up_]] .. index .. [["
-				start_tile: ]] .. startUp .. [[
-				end_tile: ]] .. startUp .. [[
-				playback: PLAYBACK_LOOP_FORWARD
-				fps: 8
-				flip_horizontal: 0
-				flip_vertical: 0
-			}
-			animations {
-				id: "walk_down_]] .. index .. [["
-				start_tile: ]] .. startDown .. [[
-				end_tile: ]] .. (startDown + 7) .. [[
-				playback: PLAYBACK_LOOP_FORWARD
-				fps: 8
-				flip_horizontal: 0
-				flip_vertical: 0
-			}
-			animations {
-				id: "walk_left_]] .. index .. [["
-				start_tile: ]] .. startLeft .. [[
-				end_tile: ]] .. (startLeft + 7) .. [[
-				playback: PLAYBACK_LOOP_FORWARD
-				fps: 8
-				flip_horizontal: 0
-				flip_vertical: 0
-			}
-			animations {
-				id: "walk_right_]] .. index .. [["
-				start_tile: ]] .. startRight .. [[
-				end_tile: ]] .. (startRight + 7) .. [[
-				playback: PLAYBACK_LOOP_FORWARD
-				fps: 8
-				flip_horizontal: 0
-				flip_vertical: 0
-			}
-			animations {
-				id: "walk_up_]] .. index .. [["
-				start_tile: ]] .. startUp .. [[
-				end_tile: ]] .. (startUp + 7) .. [[
-				playback: PLAYBACK_LOOP_FORWARD
-				fps: 8
-				flip_horizontal: 0
-				flip_vertical: 0
-			}
-			]]
-		--print(test)
-		startDown = startDown + 8
-		startUp = startUp + 8
-		startRight = startRight + 8
-		startLeft = startLeft + 8
 	end
 
     msg.post(".", "acquire_input_focus")
@@ -202,8 +120,12 @@ function on_input(self, action_id, action)
 		self.dir.x = 1
 	end
 
-	if action_id == hash("pickaxe") and action.released then
+	if (action_id == hash("pickaxe") or action_id == hash('axe')) and action.released then
 		character_animation.start_animation("#body", self.pickaxe)
+	end
+
+	if action_id == hash("sword") and action.released then
+		character_animation.start_animation("#body", self.sword)
 	end
 end
 

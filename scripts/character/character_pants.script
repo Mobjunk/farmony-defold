@@ -10,6 +10,10 @@ go.property("default_pickaxe", resource.tile_source("/assets/characters/pickaxe/
 go.property("suit_pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/pants/pants_suit_pickaxe.tilesource"))
 go.property("skirt_pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/pants/skirt_pickaxe.tilesource"))
 
+go.property("default_sword", resource.tile_source("/assets/characters/sword/clothes/pants/pants_sword.tilesource"))
+go.property("suit_sword", resource.tile_source("/assets/characters/sword/clothes/pants/pants_suit_sword.tilesource"))
+go.property("skirt_sword", resource.tile_source("/assets/characters/sword/clothes/pants/skirt_sword.tilesource"))
+
 local function get_pants_style(self)
     local styles = {
         self.skirt,
@@ -24,10 +28,13 @@ local function get_tool_pants_style(self, action)
             self.skirt_pickaxe,
             self.suit_pickaxe
         }
-		local style_index = character_looks.style[3]
-		if style_index >= 1 and style_index <= #styles then
-			return styles[style_index]
-		end
+		return styles[character_looks.style[3]] or self.default_pickaxe
+	elseif action == 'sword' then
+        local styles = {
+            self.skirt_sword,
+            self.suit_sword
+        }
+		return styles[character_looks.style[3]] or self.default_sword
     end
     return self.default_pickaxe
 end
@@ -38,19 +45,13 @@ function init(self)
 	character_animation.reset_animation("#pants", get_pants_style(self), true)
 end
 
-function final(self)
-end
-
-function update(self, dt)
-
-end
-
-function fixed_update(self, dt)
-end
-
 function on_input(self, action_id, action)
-	if action_id == hash("pickaxe") and action.released then
+	if (action_id == hash("pickaxe") or action_id == hash('axe')) and action.released then
 		character_animation.start_animation("#pants", get_tool_pants_style(self, 'pickaxe'))
+	end
+
+	if action_id == hash("sword") and action.released then
+		character_animation.start_animation("#pants", get_tool_pants_style(self, 'sword'))
 	end
 end
 

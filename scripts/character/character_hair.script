@@ -24,6 +24,28 @@ go.property("midiwave_pickaxe", resource.tile_source("/assets/characters/pickaxe
 go.property("spacebuns_pickaxe", resource.tile_source("/assets/characters/pickaxe/hair/spacebuns_pickaxe.tilesource"))
 go.property("wavy_pickaxe", resource.tile_source("/assets/characters/pickaxe/hair/wavy_pickaxe.tilesource"))
 
+go.property("default_sword", resource.tile_source("/assets/characters/sword/hair/buzzcut_sword.tilesource"))
+go.property("braids_sword", resource.tile_source("/assets/characters/sword/hair/braids_sword.tilesource"))
+go.property("curly_sword", resource.tile_source("/assets/characters/sword/hair/curly_sword.tilesource"))
+go.property("emo_sword", resource.tile_source("/assets/characters/sword/hair/emo_sword.tilesource"))
+go.property("extralong_sword", resource.tile_source("/assets/characters/sword/hair/extralong_sword.tilesource"))
+go.property("frenchcurl_sword", resource.tile_source("/assets/characters/sword/hair/frenchcurl_sword.tilesource"))
+go.property("gentleman_sword", resource.tile_source("/assets/characters/sword/hair/gentleman_sword.tilesource"))
+go.property("midiwave_sword", resource.tile_source("/assets/characters/sword/hair/midiwave_sword.tilesource"))
+go.property("spacebuns_sword", resource.tile_source("/assets/characters/sword/hair/spacebuns_sword.tilesource"))
+go.property("wavy_sword", resource.tile_source("/assets/characters/sword/hair/wavy_sword.tilesource"))
+
+go.property("default_axe", resource.tile_source("/assets/characters/axe/hair/buzzcut_axe.tilesource"))
+go.property("braids_axe", resource.tile_source("/assets/characters/axe/hair/braids_axe.tilesource"))
+go.property("curly_axe", resource.tile_source("/assets/characters/axe/hair/curly_axe.tilesource"))
+go.property("emo_axe", resource.tile_source("/assets/characters/axe/hair/emo_axe.tilesource"))
+go.property("extralong_axe", resource.tile_source("/assets/characters/axe/hair/extralong_axe.tilesource"))
+go.property("frenchcurl_axe", resource.tile_source("/assets/characters/axe/hair/frenchcurl_axe.tilesource"))
+go.property("gentleman_axe", resource.tile_source("/assets/characters/axe/hair/gentleman_axe.tilesource"))
+go.property("midiwave_axe", resource.tile_source("/assets/characters/axe/hair/midiwave_axe.tilesource"))
+go.property("spacebuns_axe", resource.tile_source("/assets/characters/axe/hair/spacebuns_axe.tilesource"))
+go.property("wavy_axe", resource.tile_source("/assets/characters/axe/hair/wavy_axe.tilesource"))
+
 local function get_hair_style(self)
     local styles = {
         self.braids,
@@ -52,10 +74,33 @@ local function get_tool_hair_style(self, action)
             self.spacebuns_pickaxe,
             self.wavy_pickaxe
         }
-        local style_index = character_looks.style[1]
-        if style_index >= 1 and style_index <= #styles then
-            return styles[style_index]
-        end
+        return styles[character_looks.style[1]] or self.default_pickaxe
+    elseif action == 'axe' then
+        local styles = {
+            self.braids_axe,
+            self.curly_axe,
+            self.emo_axe,
+            self.extralong_axe,
+            self.frenchcurl_axe,
+            self.gentleman_axe,
+            self.midiwave_axe,
+            self.spacebuns_axe,
+            self.wavy_axe
+        }
+        return styles[character_looks.style[1]] or self.default_axe
+    elseif action == 'sword' then
+        local styles = {
+            self.braids_sword,
+            self.curly_sword,
+            self.emo_sword,
+            self.extralong_sword,
+            self.frenchcurl_sword,
+            self.gentleman_sword,
+            self.midiwave_sword,
+            self.spacebuns_sword,
+            self.wavy_sword
+        }
+        return styles[character_looks.style[1]] or self.default_sword
     end
     return self.default_pickaxe
 end
@@ -70,6 +115,14 @@ end
 function on_input(self, action_id, action)
 	if action_id == hash("pickaxe") and action.released then
 		character_animation.start_animation("#hair", get_tool_hair_style(self, 'pickaxe'))
+	end
+
+	if action_id == hash("axe") and action.released then
+		character_animation.start_animation("#hair", get_tool_hair_style(self, 'axe'))
+	end
+
+	if action_id == hash("sword") and action.released then
+		character_animation.start_animation("#hair", get_tool_hair_style(self, 'sword'))
 	end
 end
 

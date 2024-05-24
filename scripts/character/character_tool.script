@@ -3,24 +3,24 @@ local character_animation = character_animation_module.new()
 
 go.property("default", resource.tile_source("/assets/characters/default_tool.tilesource"))
 go.property("pickaxe", resource.tile_source("/assets/characters/pickaxe/pickaxe.tilesource"))
+go.property("sword", resource.tile_source("/assets/characters/sword/sword.tilesource"))
+go.property("axe", resource.tile_source("/assets/characters/axe/axe.tilesource"))
 
 function init(self)
 	print(msg.url())
 	msg.post(".", "acquire_input_focus")
 end
 
-function final(self)
-end
-
-function update(self, dt)
-end
-
-function fixed_update(self, dt)
-end
-
 function on_input(self, action_id, action)
 	if action_id == hash("pickaxe") and action.released then
 		character_animation.start_animation("#tool", self.pickaxe)
+	end
+
+	if action_id == hash("sword") and action.released then
+		character_animation.start_animation("#tool", self.sword)
+	end
+	if action_id == hash("axe") and action.released then
+		character_animation.start_animation("#tool", self.axe)
 	end
 end
 
