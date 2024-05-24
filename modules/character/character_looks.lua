@@ -16,4 +16,10 @@ character_looks.colors = {
     character_looks.hair_color
 }
 
+character_looks.hair_style = 2
+
+character_looks.style = {
+    character_looks.hair_style
+}
+
 return character_looks;

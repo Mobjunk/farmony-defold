@@ -82,18 +82,15 @@ function character_animation.new()
 	end
 
 	function instance.get_color_index(url)
-		if url == '#hair' then
-			return 6
-		elseif url == '#eyes' then
-			return 5
-		elseif url == '#shoes' then
-			return 4
-		elseif url == '#pants' then
-			return 3
-		elseif url == '#shirt' then
-			return 2
-		end
-		return 1
+		local color_indices = {
+			["#hair"] = 6,
+			["#eyes"] = 5,
+			["#shoes"] = 4,
+			["#pants"] = 3,
+			["#shirt"] = 2
+		}
+	
+		return color_indices[url] or 1
 	end
 
 	return instance
