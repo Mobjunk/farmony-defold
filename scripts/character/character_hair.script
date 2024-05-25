@@ -58,6 +58,17 @@ go.property("midiwave_axe", resource.tile_source("/assets/characters/axe/hair/mi
 go.property("spacebuns_axe", resource.tile_source("/assets/characters/axe/hair/spacebuns_axe.tilesource"))
 go.property("wavy_axe", resource.tile_source("/assets/characters/axe/hair/wavy_axe.tilesource"))
 
+go.property("default_rod", resource.tile_source("/assets/characters/fishing/hair/buzzcut_rod.tilesource"))
+go.property("braids_rod", resource.tile_source("/assets/characters/fishing/hair/braids_rod.tilesource"))
+go.property("curly_rod", resource.tile_source("/assets/characters/fishing/hair/curly_rod.tilesource"))
+go.property("emo_rod", resource.tile_source("/assets/characters/fishing/hair/emo_rod.tilesource"))
+go.property("extralong_rod", resource.tile_source("/assets/characters/fishing/hair/extralong_rod.tilesource"))
+go.property("frenchcurl_rod", resource.tile_source("/assets/characters/fishing/hair/frenchcurl_rod.tilesource"))
+go.property("gentleman_rod", resource.tile_source("/assets/characters/fishing/hair/gentleman_rod.tilesource"))
+go.property("midiwave_rod", resource.tile_source("/assets/characters/fishing/hair/midiwave_rod.tilesource"))
+go.property("spacebuns_rod", resource.tile_source("/assets/characters/fishing/hair/spacebuns_rod.tilesource"))
+go.property("wavy_rod", resource.tile_source("/assets/characters/fishing/hair/wavy_rod.tilesource"))
+
 local function get_hair_style(self)
     if character_info.is_carrying then
         local styles = {
@@ -129,6 +140,19 @@ local function get_tool_hair_style(self, action)
             self.wavy_sword
         }
         return styles[character_looks.style[1]] or self.default_sword
+    elseif action == 'rod' then
+        local styles = {
+            self.braids_rod,
+            self.curly_rod,
+            self.emo_rod,
+            self.extralong_rod,
+            self.frenchcurl_rod,
+            self.gentleman_rod,
+            self.midiwave_rod,
+            self.spacebuns_rod,
+            self.wavy_rod
+        }
+        return styles[character_looks.style[1]] or self.default_rod
     end
     return self.default_pickaxe
 end
@@ -151,6 +175,10 @@ function on_input(self, action_id, action)
 
 	if action_id == hash("sword") and action.released then
 		character_animation.start_animation("#hair", get_tool_hair_style(self, 'sword'))
+	end
+
+	if action_id == hash("rod") and action.released then
+		character_animation.start_animation("#hair", get_tool_hair_style(self, 'rod'))
 	end
 end
 

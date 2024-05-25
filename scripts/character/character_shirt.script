@@ -44,6 +44,14 @@ go.property("sailor_bow_axe", resource.tile_source("/assets/characters/axe/cloth
 go.property("sporty_axe", resource.tile_source("/assets/characters/axe/clothes/body/sporty_axe.tilesource"))
 go.property("suit_axe", resource.tile_source("/assets/characters/axe/clothes/body/suit_axe.tilesource"))
 
+go.property("default_rod", resource.tile_source("/assets/characters/fishing/clothes/body/basic_fish.tilesource"))
+go.property("floral_rod", resource.tile_source("/assets/characters/fishing/clothes/body/floral_fish.tilesource"))
+go.property("overall_rod", resource.tile_source("/assets/characters/fishing/clothes/body/overall_fish.tilesource"))
+go.property("sailor_rod", resource.tile_source("/assets/characters/fishing/clothes/body/sailor_fish.tilesource"))
+go.property("sailor_bow_rod", resource.tile_source("/assets/characters/fishing/clothes/body/sailor_bow_fish.tilesource"))
+go.property("sporty_rod", resource.tile_source("/assets/characters/fishing/clothes/body/sporty_fish.tilesource"))
+go.property("suit_rod", resource.tile_source("/assets/characters/fishing/clothes/body/suit_fish.tilesource"))
+
 local function get_shirt_style(self)
     if character_info.is_carrying then
         local styles = {
@@ -99,6 +107,16 @@ local function get_tool_shirt_style(self, action)
             self.suit_sword
         }
         return styles[character_looks.style[2]] or self.default_sword
+    elseif action == 'rod' then
+        local styles = {
+            self.floral_rod,
+            self.overall_rod,
+            self.sailor_rod,
+            self.sailor_bow_rod,
+            self.sporty_rod,
+            self.suit_rod
+        }
+        return styles[character_looks.style[2]] or self.default_rod
     end
     return self.default_pickaxe
 end
@@ -120,6 +138,10 @@ function on_input(self, action_id, action)
 
 	if action_id == hash("sword") and action.released then
 		character_animation.start_animation("#shirt", get_tool_shirt_style(self, 'sword'))
+	end
+
+	if action_id == hash("rod") and action.released then
+		character_animation.start_animation("#shirt", get_tool_shirt_style(self, 'rod'))
 	end
 end
 

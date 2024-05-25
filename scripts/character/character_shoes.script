@@ -7,6 +7,7 @@ go.property("carry", resource.tile_source("/assets/characters/carrying/clothes/s
 go.property("pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/shoes/shoes_pickaxe.tilesource"))
 go.property("sword", resource.tile_source("/assets/characters/sword/clothes/shoes/shoes_sword.tilesource"))
 go.property("axe", resource.tile_source("/assets/characters/axe/clothes/shoes/shoes_axe.tilesource"))
+go.property("rod", resource.tile_source("/assets/characters/fishing/clothes/shoes/shoes_rod.tilesource"))
 
 function init(self)
 	print(msg.url())
@@ -29,6 +30,10 @@ function on_input(self, action_id, action)
 
 	if action_id == hash("sword") and action.released then
 		character_animation.start_animation("#shoes", self.sword)
+	end
+
+	if action_id == hash("rod") and action.released then
+		character_animation.start_animation("#shoes", self.rod)
 	end
 end
 
