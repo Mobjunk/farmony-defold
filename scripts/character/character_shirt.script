@@ -1,3 +1,4 @@
+local character_info = require('modules.character.character_information')
 local character_looks = require('modules.character.character_looks')
 local character_animation_module = require('modules.character.animation.character_animation')
 local character_animation = character_animation_module.new()
@@ -9,6 +10,15 @@ go.property("sailor", resource.tile_source("/assets/characters/walk/clothes/body
 go.property("sailor_bow", resource.tile_source("/assets/characters/walk/clothes/body/sailor_bow.tilesource"))
 go.property("sporty", resource.tile_source("/assets/characters/walk/clothes/body/sporty.tilesource"))
 go.property("suit", resource.tile_source("/assets/characters/walk/clothes/body/suit.tilesource"))
+
+
+go.property("default_carry", resource.tile_source("/assets/characters/carrying/clothes/body/basic_carry.tilesource"))
+go.property("floral_carry", resource.tile_source("/assets/characters/carrying/clothes/body/floral_carry.tilesource"))
+go.property("overall_carry", resource.tile_source("/assets/characters/carrying/clothes/body/overall_carry.tilesource"))
+go.property("sailor_carry", resource.tile_source("/assets/characters/carrying/clothes/body/sailor_carry.tilesource"))
+go.property("sailor_bow_carry", resource.tile_source("/assets/characters/carrying/clothes/body/sailor_bow_carry.tilesource"))
+go.property("sporty_carry", resource.tile_source("/assets/characters/carrying/clothes/body/sporty_carry.tilesource"))
+go.property("suit_carry", resource.tile_source("/assets/characters/carrying/clothes/body/suit_carry.tilesource"))
 
 go.property("default_pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/body/basic_pickaxe.tilesource"))
 go.property("floral_pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/body/floral_pickaxe.tilesource"))
@@ -35,15 +45,27 @@ go.property("sporty_axe", resource.tile_source("/assets/characters/axe/clothes/b
 go.property("suit_axe", resource.tile_source("/assets/characters/axe/clothes/body/suit_axe.tilesource"))
 
 local function get_shirt_style(self)
-    local styles = {
-        self.floral,
-        self.overall,
-        self.sailor,
-        self.sailor_bow,
-        self.sporty,
-        self.suit
-    }
-    return styles[character_looks.style[2]] or self.default
+    if character_info.is_carrying then
+        local styles = {
+            self.floral_carry,
+            self.overall_carry,
+            self.sailor_carry,
+            self.sailor_bow_carry,
+            self.sporty_carry,
+            self.suit_carry
+        }
+        return styles[character_looks.style[2]] or self.default_carry
+    else
+        local styles = {
+            self.floral,
+            self.overall,
+            self.sailor,
+            self.sailor_bow,
+            self.sporty,
+            self.suit
+        }
+        return styles[character_looks.style[2]] or self.default
+    end
 end
 
 local function get_tool_shirt_style(self, action)

@@ -1,13 +1,20 @@
+local character_info = require('modules.character.character_information')
 local character_animation_module = require('modules.character.animation.character_animation')
 local character_animation = character_animation_module.new()
 
 go.property("default", resource.tile_source("/assets/characters/walk/eyes/eyes.tilesource"))
+go.property("carry", resource.tile_source("/assets/characters/walk/eyes/eyes.tilesource"))
 go.property("pickaxe", resource.tile_source("/assets/characters/pickaxe/eyes/eyes_pickaxe.tilesource"))
 go.property("sword", resource.tile_source("/assets/characters/sword/eyes/eyes_sword.tilesource"))
 
 function init(self)
 	print(msg.url())
 	msg.post(".", "acquire_input_focus")
+	local default = self.default
+	if character_info.is_carrying then
+		default = self.carry
+	end
+	character_animation.reset_animation("#eyes", default, true)
 end
 
 function on_input(self, action_id, action)
@@ -21,11 +28,15 @@ function on_input(self, action_id, action)
 end
 
 function on_message(self, message_id, message, sender)
+	local default = self.default
+	if character_info.is_carrying then
+		default = self.carry
+	end
 	if message_id == hash('reset_animation') then
-		character_animation.reset_animation("#eyes", self.default, true)
+		character_animation.reset_animation("#eyes", default, true)
 	elseif message_id == hash("animate") then
 		character_animation.play_animation("#eyes", message.direction)
 	end
 
-	character_animation.on_message(message_id, "#eyes", self.default)
+	character_animation.on_message(message_id, "#eyes", default)
 end

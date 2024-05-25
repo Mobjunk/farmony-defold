@@ -66,6 +66,14 @@ key_trigger {
   input: KEY_V
   action: "axe"
 }
+key_trigger {
+  input: KEY_F1
+  action: "carry"
+}
+key_trigger {
+  input: KEY_SPACE
+  action: "randomize"
+}
 mouse_trigger {
   input: MOUSE_BUTTON_1
   action: "touch"

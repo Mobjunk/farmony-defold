@@ -16,7 +16,7 @@ character_looks.colors = {
     character_looks.hair_color
 }
 
-character_looks.hair_style = 1
+character_looks.hair_style = 0
 character_looks.shirt_style = 0
 character_looks.pants_style = 0
 

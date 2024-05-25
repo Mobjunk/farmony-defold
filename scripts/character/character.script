@@ -3,11 +3,31 @@ local character_animation_module = require('modules.character.animation.characte
 local character_animation = character_animation_module.new()
 
 go.property("default", resource.tile_source("/assets/characters/walk/character.tilesource"))
+go.property("carry", resource.tile_source("/assets/characters/carrying/character_carry.tilesource"))
 go.property("pickaxe", resource.tile_source("/assets/characters/pickaxe/character_pickaxe.tilesource"))
 go.property("sword", resource.tile_source("/assets/characters/sword/character_sword.tilesource"))
 go.property("axe", resource.tile_source("/assets/characters/axe/character_axe.tilesource"))
 
 local speed = 150
+
+local function reset_all_animations(self)
+	local default = self.default
+	if character_info.is_carrying then
+		default = self.carry
+	end
+
+	local urls = {
+		"shirt#character_shirt",
+		"pants#character_pants",
+		"shoes#character_shoes",
+		"eyes#character_eyes",
+		"hair#character_hair"
+	}
+	character_animation.reset_animation("#body", default, true)
+	for _, value in pairs(urls) do
+		msg.post(value, "reset_animation");
+	end
+end
 
 function init(self)
 
@@ -69,6 +89,11 @@ function init(self)
 
     msg.post(".", "acquire_input_focus")
 	self.dir = vmath.vector3()
+	local default = self.default
+	if character_info.is_carrying then
+		default = self.carry
+	end
+	character_animation.reset_animation("#body", default, true)
 end
 
 function update(self, dt)
@@ -89,7 +114,11 @@ function update(self, dt)
 	}
 
 	if self.dir.x ~= 0 or self.dir.y ~= 0 then
-		character_animation.reset_animation("#body", self.default, true)
+		local default = self.default
+		if character_info.is_carrying then
+			default = self.carry
+		end
+		character_animation.reset_animation("#body", default, true)
 		for _, value in pairs(urls) do
 			msg.post(value, "reset_animation");
 		end
@@ -132,8 +161,45 @@ function on_input(self, action_id, action)
 	if action_id == hash("sword") and action.released then
 		character_animation.start_animation("#body", self.sword)
 	end
+
+	if action_id == hash("carry") and action.released then
+		character_info.is_carrying = not character_info.is_carrying
+		reset_all_animations(self)
+	end
+
+
+	if action_id == hash("randomize") and action.released then
+		math.randomseed(os.time())
+		
+		for index = 1, #character_info.looks.colors, 1 do
+			local max_number = (index == 1) and 7 or 9
+			character_info.looks.colors[index] = math.random(0, max_number)
+		end
+
+		for index = 1, #character_info.looks.style, 1 do
+			local max_number = 9
+			if index == 2 then
+				max_number = 7
+			elseif index == 3 then
+				max_number = 2
+			end
+			character_info.looks.style[index] = math.random(0, max_number)
+		end
+		
+		if character_info.looks.style[2] == 4 and character_info.looks.colors[2] > 8 then
+			character_info.looks.colors[2] = 8
+			print('Make sure that for sailor bow it cannot exceed 8')
+		end
+
+		reset_all_animations(self)
+	end
+
 end
 
 function on_message(self, message_id, message, sender)
-	character_animation.on_message(message_id, "#body", self.default)
+	local default = self.default
+	if character_info.is_carrying then
+		default = self.carry
+	end
+	character_animation.on_message(message_id, "#body", default)
 end

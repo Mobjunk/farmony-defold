@@ -1,3 +1,4 @@
+local character_info = require('modules.character.character_information')
 local character_looks = require('modules.character.character_looks')
 local character_animation_module = require('modules.character.animation.character_animation')
 local character_animation = character_animation_module.new()
@@ -5,6 +6,10 @@ local character_animation = character_animation_module.new()
 go.property("default", resource.tile_source("/assets/characters/walk/clothes/pants/pants.tilesource"))
 go.property("suit", resource.tile_source("/assets/characters/walk/clothes/pants/pants_suit.tilesource"))
 go.property("skirt", resource.tile_source("/assets/characters/walk/clothes/pants/skirt.tilesource"))
+
+go.property("default_carry", resource.tile_source("/assets/characters/carrying/clothes/pants/pants_carry.tilesource"))
+go.property("suit_carry", resource.tile_source("/assets/characters/carrying/clothes/pants/pants_suit_carry.tilesource"))
+go.property("skirt_carry", resource.tile_source("/assets/characters/carrying/clothes/pants/skirt_carry.tilesource"))
 
 go.property("default_pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/pants/pants_pickaxe.tilesource"))
 go.property("suit_pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/pants/pants_suit_pickaxe.tilesource"))
@@ -19,11 +24,19 @@ go.property("suit_axe", resource.tile_source("/assets/characters/axe/clothes/pan
 go.property("skirt_axe", resource.tile_source("/assets/characters/axe/clothes/pants/skirt_axe.tilesource"))
 
 local function get_pants_style(self)
-    local styles = {
-        self.skirt,
-        self.suit
-    }
-    return styles[character_looks.style[3]] or self.default
+    if character_info.is_carrying then
+		local styles = {
+			self.skirt_carry,
+			self.suit_carry
+		}
+		return styles[character_looks.style[3]] or self.default_carry
+	else
+		local styles = {
+			self.skirt,
+			self.suit
+		}
+		return styles[character_looks.style[3]] or self.default
+	end
 end
 
 local function get_tool_pants_style(self, action)
@@ -34,7 +47,6 @@ local function get_tool_pants_style(self, action)
         }
 		return styles[character_looks.style[3]] or self.default_pickaxe
 	elseif action == 'axe' then
-		print('character_looks.style[3]',character_looks.style[3])
         local styles = {
             self.skirt_axe,
             self.suit_axe

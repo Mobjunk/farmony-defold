@@ -1,3 +1,4 @@
+local character_info = require('modules.character.character_information')
 local character_looks = require('modules.character.character_looks')
 local character_animation_module = require('modules.character.animation.character_animation')
 local character_animation = character_animation_module.new()
@@ -12,6 +13,17 @@ go.property("gentleman", resource.tile_source("/assets/characters/walk/hair/gent
 go.property("midiwave", resource.tile_source("/assets/characters/walk/hair/midiwave.tilesource"))
 go.property("spacebuns", resource.tile_source("/assets/characters/walk/hair/spacebuns.tilesource"))
 go.property("wavy", resource.tile_source("/assets/characters/walk/hair/wavy.tilesource"))
+
+go.property("default_carry", resource.tile_source("/assets/characters/carrying/hair/buzzcut_carry.tilesource"))
+go.property("braids_carry", resource.tile_source("/assets/characters/carrying/hair/braids_carry.tilesource"))
+go.property("curly_carry", resource.tile_source("/assets/characters/carrying/hair/curly_carry.tilesource"))
+go.property("emo_carry", resource.tile_source("/assets/characters/carrying/hair/emo_carry.tilesource"))
+go.property("extralong_carry", resource.tile_source("/assets/characters/carrying/hair/extralong_carry.tilesource"))
+go.property("frenchcurl_carry", resource.tile_source("/assets/characters/carrying/hair/frenchcurl_carry.tilesource"))
+go.property("gentleman_carry", resource.tile_source("/assets/characters/carrying/hair/gentleman_carry.tilesource"))
+go.property("midiwave_carry", resource.tile_source("/assets/characters/carrying/hair/midiwave_carry.tilesource"))
+go.property("spacebuns_carry", resource.tile_source("/assets/characters/carrying/hair/spacebuns_carry.tilesource"))
+go.property("wavy_carry", resource.tile_source("/assets/characters/carrying/hair/wavy_carry.tilesource"))
 
 go.property("default_pickaxe", resource.tile_source("/assets/characters/pickaxe/hair/buzzcut_pickaxe.tilesource"))
 go.property("braids_pickaxe", resource.tile_source("/assets/characters/pickaxe/hair/braids_pickaxe.tilesource"))
@@ -47,18 +59,33 @@ go.property("spacebuns_axe", resource.tile_source("/assets/characters/axe/hair/s
 go.property("wavy_axe", resource.tile_source("/assets/characters/axe/hair/wavy_axe.tilesource"))
 
 local function get_hair_style(self)
-    local styles = {
-        self.braids,
-        self.curly,
-        self.emo,
-        self.extralong,
-        self.frenchcurl,
-        self.gentleman,
-        self.midiwave,
-        self.spacebuns,
-        self.wavy
-    }
-    return styles[character_looks.style[1]] or self.default
+    if character_info.is_carrying then
+        local styles = {
+            self.braids_carry,
+            self.curly_carry,
+            self.emo_carry,
+            self.extralong_carry,
+            self.frenchcurl_carry,
+            self.gentleman_carry,
+            self.midiwave_carry,
+            self.spacebuns_carry,
+            self.wavy_carry
+        }
+        return styles[character_looks.style[1]] or self.default_carry
+    else
+        local styles = {
+            self.braids,
+            self.curly,
+            self.emo,
+            self.extralong,
+            self.frenchcurl,
+            self.gentleman,
+            self.midiwave,
+            self.spacebuns,
+            self.wavy
+        }
+        return styles[character_looks.style[1]] or self.default
+    end
 end
 
 local function get_tool_hair_style(self, action)
