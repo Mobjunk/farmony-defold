@@ -82,6 +82,10 @@ key_trigger {
   input: KEY_H
   action: "hoe"
 }
+key_trigger {
+  input: KEY_W
+  action: "watering"
+}
 mouse_trigger {
   input: MOUSE_BUTTON_1
   action: "touch"

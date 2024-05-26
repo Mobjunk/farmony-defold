@@ -10,6 +10,7 @@ go.property("sword", resource.tile_source("/assets/characters/sword/sword.tileso
 go.property("axe", resource.tile_source("/assets/characters/axe/axe.tilesource"))
 go.property("rod", resource.tile_source("/assets/characters/fishing/rod.tilesource"))
 go.property("hoe", resource.tile_source("/assets/characters/hoe/hoe.tilesource"))
+go.property("watering", resource.tile_source("/assets/characters/watering/watering.tilesource"))
 
 function init(self)
 	print(msg.url())
@@ -40,6 +41,11 @@ function on_input(self, action_id, action)
 			go.set_position(vmath.vector3(0, -7, 0))
 		end
 		character_animation.start_animation("#tool", self.hoe)
+	end
+	
+	if action_id == hash("watering") and action.released then
+		go.set_position(vmath.vector3(0, -5, 0))
+		character_animation.start_animation("#tool", self.watering)
 	end
 end
 

@@ -9,6 +9,7 @@ go.property("sword", resource.tile_source("/assets/characters/sword/character_sw
 go.property("axe", resource.tile_source("/assets/characters/axe/character_axe.tilesource"))
 go.property("rod", resource.tile_source("/assets/characters/fishing/character_rod.tilesource"))
 go.property("hoe", resource.tile_source("/assets/characters/hoe/character_hoe.tilesource"))
+go.property("watering", resource.tile_source("/assets/characters/watering/character_watering.tilesource"))
 
 local speed = 150
 
@@ -35,16 +36,12 @@ end
 function init(self)
 
 	local interaction_name = "idle"
-	--[[local startDown = 1
-	local startUp = 41
-	local startRight = 81
-	local startLeft = 121]]
 	local startDown = 1
-	local startUp = 57
-	local startRight = 113
-	local startLeft = 169
-	local totalFrames = 4
-	for index = 0, 9, 1 do
+	local startUp = 29
+	local startRight = 57
+	local startLeft = 85
+	local totalFrames = 2
+	for index = 0, 13, 1 do
 		local test =  [[
 			animations {
 				id: "]] .. interaction_name .. [[_down_]] .. index .. [["
@@ -83,7 +80,7 @@ function init(self)
 				flip_vertical: 0
 			}
 			]]
-		--print(test)
+		print(test)
 		startDown = startDown + totalFrames
 		startUp = startUp + totalFrames
 		startRight = startRight + totalFrames
@@ -172,6 +169,10 @@ function on_input(self, action_id, action)
 
 	if action_id == hash("hoe") and action.released then
 		character_animation.start_animation("#body", self.hoe)
+	end
+
+	if action_id == hash("watering") and action.released then
+		character_animation.start_animation("#body", self.watering)
 	end
 
 	if action_id == hash("carry") and action.released then

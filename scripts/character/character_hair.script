@@ -82,6 +82,17 @@ go.property("midiwave_hoe", resource.tile_source("/assets/characters/hoe/hair/mi
 go.property("spacebuns_hoe", resource.tile_source("/assets/characters/hoe/hair/spacebuns_hoe.tilesource"))
 go.property("wavy_hoe", resource.tile_source("/assets/characters/hoe/hair/wavy_hoe.tilesource"))
 
+go.property("default_watering", resource.tile_source("/assets/characters/watering/hair/buzzcut_watering.tilesource"))
+go.property("braids_watering", resource.tile_source("/assets/characters/watering/hair/braids_watering.tilesource"))
+go.property("curly_watering", resource.tile_source("/assets/characters/watering/hair/curly_watering.tilesource"))
+go.property("emo_watering", resource.tile_source("/assets/characters/watering/hair/emo_watering.tilesource"))
+go.property("extralong_watering", resource.tile_source("/assets/characters/watering/hair/extralong_watering.tilesource"))
+go.property("frenchcurl_watering", resource.tile_source("/assets/characters/watering/hair/frenchcurl_watering.tilesource"))
+go.property("gentleman_watering", resource.tile_source("/assets/characters/watering/hair/gentleman_watering.tilesource"))
+go.property("midiwave_watering", resource.tile_source("/assets/characters/watering/hair/midiwave_watering.tilesource"))
+go.property("spacebuns_watering", resource.tile_source("/assets/characters/watering/hair/spacebuns_watering.tilesource"))
+go.property("wavy_watering", resource.tile_source("/assets/characters/watering/hair/wavy_watering.tilesource"))
+
 local function get_hair_style(self)
     if character_info.is_carrying then
         local styles = {
@@ -179,6 +190,19 @@ local function get_tool_hair_style(self, action)
             self.wavy_hoe
         }
         return styles[character_looks.style[1]] or self.default_hoe
+    elseif action == 'watering' then
+        local styles = {
+            self.braids_watering,
+            self.curly_watering,
+            self.emo_watering,
+            self.extralong_watering,
+            self.frenchcurl_watering,
+            self.gentleman_watering,
+            self.midiwave_watering,
+            self.spacebuns_watering,
+            self.wavy_watering
+        }
+        return styles[character_looks.style[1]] or self.default_watering
     end
     return self.default_pickaxe
 end
@@ -214,6 +238,11 @@ function on_input(self, action_id, action)
 			go.set_position(vmath.vector3(0, -7, 0))
 		end
 		character_animation.start_animation("#hair", get_tool_hair_style(self, 'hoe'))
+	end
+
+	if action_id == hash("watering") and action.released then
+		go.set_position(vmath.vector3(0, -5, 0))
+		character_animation.start_animation("#hair", get_tool_hair_style(self, 'watering'))
 	end
 end
 
