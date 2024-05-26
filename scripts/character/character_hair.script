@@ -3,6 +3,8 @@ local character_looks = require('modules.character.character_looks')
 local character_animation_module = require('modules.character.animation.character_animation')
 local character_animation = character_animation_module.new()
 
+local default_pos
+
 go.property("default", resource.tile_source("/assets/characters/walk/hair/buzzcut.tilesource"))
 go.property("braids", resource.tile_source("/assets/characters/walk/hair/braids.tilesource"))
 go.property("curly", resource.tile_source("/assets/characters/walk/hair/curly.tilesource"))
@@ -185,6 +187,7 @@ end
 function init(self)
 	print(msg.url())
 	msg.post(".", "acquire_input_focus")
+    default_pos = go.get_position()
 	character_animation.reset_animation("#hair", get_hair_style(self), true)
 end
 
@@ -202,10 +205,14 @@ function on_input(self, action_id, action)
 	end
 
 	if action_id == hash("rod") and action.released then
+		go.set_position(vmath.vector3(0, -4, 0))
 		character_animation.start_animation("#hair", get_tool_hair_style(self, 'rod'))
 	end
 
 	if action_id == hash("hoe") and action.released then
+		if character_info.direction == 'down' then
+			go.set_position(vmath.vector3(0, -7, 0))
+		end
 		character_animation.start_animation("#hair", get_tool_hair_style(self, 'hoe'))
 	end
 end
@@ -217,5 +224,5 @@ function on_message(self, message_id, message, sender)
 		character_animation.play_animation("#hair", message.direction)
 	end
 
-	character_animation.on_message(message_id, "#hair", get_hair_style(self))
+	character_animation.on_message(message_id, "#hair", get_hair_style(self), default_pos)
 end

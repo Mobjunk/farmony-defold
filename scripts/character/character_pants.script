@@ -3,6 +3,8 @@ local character_looks = require('modules.character.character_looks')
 local character_animation_module = require('modules.character.animation.character_animation')
 local character_animation = character_animation_module.new()
 
+local default_pos
+
 go.property("default", resource.tile_source("/assets/characters/walk/clothes/pants/pants.tilesource"))
 go.property("suit", resource.tile_source("/assets/characters/walk/clothes/pants/pants_suit.tilesource"))
 go.property("skirt", resource.tile_source("/assets/characters/walk/clothes/pants/skirt.tilesource"))
@@ -86,6 +88,7 @@ function init(self)
 	print(msg.url())
 	msg.post(".", "acquire_input_focus")
 	character_animation.reset_animation("#pants", get_pants_style(self), true)
+	default_pos = go.get_position()
 end
 
 function on_input(self, action_id, action)
@@ -102,10 +105,14 @@ function on_input(self, action_id, action)
 	end
 
 	if action_id == hash("rod") and action.released then
+		go.set_position(vmath.vector3(0, -4, 0))
 		character_animation.start_animation("#pants", get_tool_pants_style(self, 'rod'))
 	end
 
 	if action_id == hash("hoe") and action.released then
+		if character_info.direction == 'down' then
+			go.set_position(vmath.vector3(0, -7, 0))
+		end
 		character_animation.start_animation("#pants", get_tool_pants_style(self, 'hoe'))
 	end
 end
@@ -117,5 +124,5 @@ function on_message(self, message_id, message, sender)
 		character_animation.play_animation("#pants", message.direction)
 	end
 
-	character_animation.on_message(message_id, "#pants", get_pants_style(self))
+	character_animation.on_message(message_id, "#pants", get_pants_style(self), default_pos)
 end

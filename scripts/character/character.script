@@ -23,7 +23,8 @@ local function reset_all_animations(self)
 		"pants#character_pants",
 		"shoes#character_shoes",
 		"eyes#character_eyes",
-		"hair#character_hair"
+		"hair#character_hair",
+		"body#character_body"
 	}
 	character_animation.reset_animation("#body", default, true)
 	for _, value in pairs(urls) do
@@ -112,7 +113,8 @@ function update(self, dt)
 		"pants#character_pants",
 		"shoes#character_shoes",
 		"eyes#character_eyes",
-		"hair#character_hair"
+		"hair#character_hair",
+		"body#character_body"
 	}
 
 	if self.dir.x ~= 0 or self.dir.y ~= 0 then

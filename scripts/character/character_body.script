@@ -1,0 +1,67 @@
+local character_info = require('modules.character.character_information')
+local character_animation_module = require('modules.character.animation.character_animation')
+local character_animation = character_animation_module.new()
+
+local default_pos
+
+go.property("default", resource.tile_source("/assets/characters/walk/character.tilesource"))
+go.property("carry", resource.tile_source("/assets/characters/carrying/character_carry.tilesource"))
+go.property("pickaxe", resource.tile_source("/assets/characters/pickaxe/character_pickaxe.tilesource"))
+go.property("sword", resource.tile_source("/assets/characters/sword/character_sword.tilesource"))
+go.property("axe", resource.tile_source("/assets/characters/axe/character_axe.tilesource"))
+go.property("rod", resource.tile_source("/assets/characters/fishing/character_rod.tilesource"))
+go.property("hoe", resource.tile_source("/assets/characters/hoe/character_hoe.tilesource"))
+
+function init(self)
+	print(msg.url())
+	msg.post(".", "acquire_input_focus")
+
+	default_pos = go.get_position()
+
+	local default = self.default
+	if character_info.is_carrying then
+		default = self.carry
+	end
+	character_animation.reset_animation("#body", default, true)
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("pickaxe") and action.released then
+		character_animation.start_animation("#body", self.pickaxe)
+	end
+
+	if action_id == hash('axe') and action.released then
+		character_animation.start_animation("#body", self.axe)
+	end
+
+	if action_id == hash("sword") and action.released then
+		character_animation.start_animation("#body", self.sword)
+	end
+
+	if action_id == hash("rod") and action.released then
+		go.set_position(vmath.vector3(0, -4, 0))
+		character_animation.start_animation("#body", self.rod)
+	end
+
+	if action_id == hash("hoe") and action.released then
+		if character_info.direction == 'down' then
+			go.set_position(vmath.vector3(0, -7, 0))
+		end
+		character_animation.start_animation("#body", self.hoe)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	local default = self.default
+	if character_info.is_carrying then
+		default = self.carry
+	end
+
+	if message_id == hash('reset_animation') then
+		character_animation.reset_animation("#body", default, true)
+	elseif message_id == hash("animate") then
+		character_animation.play_animation("#body", message.direction)
+	end
+
+	character_animation.on_message(message_id, "#body", default, default_pos)
+end

@@ -2,6 +2,8 @@ local character_info = require('modules.character.character_information')
 local character_animation_module = require('modules.character.animation.character_animation')
 local character_animation = character_animation_module.new()
 
+local default_pos
+
 go.property("default", resource.tile_source("/assets/characters/walk/clothes/shoes/shoes.tilesource"))
 go.property("carry", resource.tile_source("/assets/characters/carrying/clothes/shoes/shoes_carry.tilesource"))
 go.property("pickaxe", resource.tile_source("/assets/characters/pickaxe/clothes/shoes/shoes_pickaxe.tilesource"))
@@ -18,6 +20,7 @@ function init(self)
 		default = self.carry
 	end
 	character_animation.reset_animation("#shoes", default, true)
+	default_pos = go.get_position()
 end
 
 function on_input(self, action_id, action)
@@ -34,10 +37,14 @@ function on_input(self, action_id, action)
 	end
 
 	if action_id == hash("rod") and action.released then
+		go.set_position(vmath.vector3(0, -4, 0))
 		character_animation.start_animation("#shoes", self.rod)
 	end
 
 	if action_id == hash("hoe") and action.released then
+		if character_info.direction == 'down' then
+			go.set_position(vmath.vector3(0, -7, 0))
+		end
 		character_animation.start_animation("#shoes", self.hoe)
 	end
 end
@@ -54,5 +61,5 @@ function on_message(self, message_id, message, sender)
 		character_animation.play_animation("#shoes", message.direction)
 	end
 
-	character_animation.on_message(message_id, "#shoes", default)
+	character_animation.on_message(message_id, "#shoes", default, default_pos)
 end

@@ -73,8 +73,11 @@ function character_animation.new()
 		instance.animation_playing = true
 	end
 
-	function instance.on_message(message_id, url, default)
+	function instance.on_message(message_id, url, default, default_pos)
 		if message_id == hash("animation_done") then
+			if default_pos then
+				go.set_position(default_pos)
+			end
 			instance.reset_animation(url, default, true)
 		end
 	end
