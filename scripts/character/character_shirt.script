@@ -52,6 +52,14 @@ go.property("sailor_bow_rod", resource.tile_source("/assets/characters/fishing/c
 go.property("sporty_rod", resource.tile_source("/assets/characters/fishing/clothes/body/sporty_fish.tilesource"))
 go.property("suit_rod", resource.tile_source("/assets/characters/fishing/clothes/body/suit_fish.tilesource"))
 
+go.property("default_hoe", resource.tile_source("/assets/characters/hoe/clothes/body/basic_hoe.tilesource"))
+go.property("floral_hoe", resource.tile_source("/assets/characters/hoe/clothes/body/floral_hoe.tilesource"))
+go.property("overall_hoe", resource.tile_source("/assets/characters/hoe/clothes/body/overall_hoe.tilesource"))
+go.property("sailor_hoe", resource.tile_source("/assets/characters/hoe/clothes/body/sailor_hoe.tilesource"))
+go.property("sailor_bow_hoe", resource.tile_source("/assets/characters/hoe/clothes/body/sailor_bow_hoe.tilesource"))
+go.property("sporty_hoe", resource.tile_source("/assets/characters/hoe/clothes/body/sporty_hoe.tilesource"))
+go.property("suit_hoe", resource.tile_source("/assets/characters/hoe/clothes/body/suit_hoe.tilesource"))
+
 local function get_shirt_style(self)
     if character_info.is_carrying then
         local styles = {
@@ -117,6 +125,16 @@ local function get_tool_shirt_style(self, action)
             self.suit_rod
         }
         return styles[character_looks.style[2]] or self.default_rod
+    elseif action == 'hoe' then
+        local styles = {
+            self.floral_hoe,
+            self.overall_hoe,
+            self.sailor_hoe,
+            self.sailor_bow_hoe,
+            self.sporty_hoe,
+            self.suit_hoe
+        }
+        return styles[character_looks.style[2]] or self.default_hoe
     end
     return self.default_pickaxe
 end
@@ -142,6 +160,10 @@ function on_input(self, action_id, action)
 
 	if action_id == hash("rod") and action.released then
 		character_animation.start_animation("#shirt", get_tool_shirt_style(self, 'rod'))
+	end
+
+	if action_id == hash("hoe") and action.released then
+		character_animation.start_animation("#shirt", get_tool_shirt_style(self, 'hoe'))
 	end
 end
 

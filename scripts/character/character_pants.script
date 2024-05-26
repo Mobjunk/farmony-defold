@@ -27,6 +27,10 @@ go.property("default_rod", resource.tile_source("/assets/characters/fishing/clot
 go.property("suit_rod", resource.tile_source("/assets/characters/fishing/clothes/pants/pants_suit_rod.tilesource"))
 go.property("skirt_rod", resource.tile_source("/assets/characters/fishing/clothes/pants/skirt_rod.tilesource"))
 
+go.property("default_hoe", resource.tile_source("/assets/characters/hoe/clothes/pants/pants_hoe.tilesource"))
+go.property("suit_hoe", resource.tile_source("/assets/characters/hoe/clothes/pants/pants_suit_hoe.tilesource"))
+go.property("skirt_hoe", resource.tile_source("/assets/characters/hoe/clothes/pants/skirt_hoe.tilesource"))
+
 local function get_pants_style(self)
     if character_info.is_carrying then
 		local styles = {
@@ -68,6 +72,12 @@ local function get_tool_pants_style(self, action)
             self.suit_rod
         }
 		return styles[character_looks.style[3]] or self.default_rod
+	elseif action == 'hoe' then
+        local styles = {
+            self.skirt_hoe,
+            self.suit_hoe
+        }
+		return styles[character_looks.style[3]] or self.default_hoe
     end
     return self.default_pickaxe
 end
@@ -93,6 +103,10 @@ function on_input(self, action_id, action)
 
 	if action_id == hash("rod") and action.released then
 		character_animation.start_animation("#pants", get_tool_pants_style(self, 'rod'))
+	end
+
+	if action_id == hash("hoe") and action.released then
+		character_animation.start_animation("#pants", get_tool_pants_style(self, 'hoe'))
 	end
 end
 

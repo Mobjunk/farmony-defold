@@ -69,6 +69,17 @@ go.property("midiwave_rod", resource.tile_source("/assets/characters/fishing/hai
 go.property("spacebuns_rod", resource.tile_source("/assets/characters/fishing/hair/spacebuns_rod.tilesource"))
 go.property("wavy_rod", resource.tile_source("/assets/characters/fishing/hair/wavy_rod.tilesource"))
 
+go.property("default_hoe", resource.tile_source("/assets/characters/hoe/hair/buzzcut_hoe.tilesource"))
+go.property("braids_hoe", resource.tile_source("/assets/characters/hoe/hair/braids_hoe.tilesource"))
+go.property("curly_hoe", resource.tile_source("/assets/characters/hoe/hair/curly_hoe.tilesource"))
+go.property("emo_hoe", resource.tile_source("/assets/characters/hoe/hair/emo_hoe.tilesource"))
+go.property("extralong_hoe", resource.tile_source("/assets/characters/hoe/hair/extralong_hoe.tilesource"))
+go.property("frenchcurl_hoe", resource.tile_source("/assets/characters/hoe/hair/frenchcurl_hoe.tilesource"))
+go.property("gentleman_hoe", resource.tile_source("/assets/characters/hoe/hair/gentleman_hoe.tilesource"))
+go.property("midiwave_hoe", resource.tile_source("/assets/characters/hoe/hair/midiwave_hoe.tilesource"))
+go.property("spacebuns_hoe", resource.tile_source("/assets/characters/hoe/hair/spacebuns_hoe.tilesource"))
+go.property("wavy_hoe", resource.tile_source("/assets/characters/hoe/hair/wavy_hoe.tilesource"))
+
 local function get_hair_style(self)
     if character_info.is_carrying then
         local styles = {
@@ -153,6 +164,19 @@ local function get_tool_hair_style(self, action)
             self.wavy_rod
         }
         return styles[character_looks.style[1]] or self.default_rod
+    elseif action == 'hoe' then
+        local styles = {
+            self.braids_hoe,
+            self.curly_hoe,
+            self.emo_hoe,
+            self.extralong_hoe,
+            self.frenchcurl_hoe,
+            self.gentleman_hoe,
+            self.midiwave_hoe,
+            self.spacebuns_hoe,
+            self.wavy_hoe
+        }
+        return styles[character_looks.style[1]] or self.default_hoe
     end
     return self.default_pickaxe
 end
@@ -179,6 +203,10 @@ function on_input(self, action_id, action)
 
 	if action_id == hash("rod") and action.released then
 		character_animation.start_animation("#hair", get_tool_hair_style(self, 'rod'))
+	end
+
+	if action_id == hash("hoe") and action.released then
+		character_animation.start_animation("#hair", get_tool_hair_style(self, 'hoe'))
 	end
 end
 
