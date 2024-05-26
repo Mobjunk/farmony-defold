@@ -1,0 +1,5 @@
+local item_definitions = require('modules.utility.item_definitions')
+
+function init(self)
+	--item_definitions.initilize()
+end

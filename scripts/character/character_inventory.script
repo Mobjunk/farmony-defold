@@ -1,0 +1,36 @@
+local item_definitions = require('modules.utility.item_definitions')
+local container_module = require('modules.container.container')
+local container = container_module.new()
+
+local function container_updated()
+	
+end
+
+function init(self)
+	item_definitions.initilize()
+	container.initilize(36, 'standard', false, container_updated)
+	print('Add 10 axes')
+	container.add(1, 10)
+	container.print_container()
+	print('Remove 2 axes')
+	container.remove(1, 2, false, 3)
+	container.print_container()
+end
+
+function final(self)
+end
+
+function update(self, dt)
+end
+
+function fixed_update(self, dt)
+end
+
+function on_message(self, message_id, message, sender)
+end
+
+function on_input(self, action_id, action)
+end
+
+function on_reload(self)
+end

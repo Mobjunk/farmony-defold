@@ -64,7 +64,7 @@ function init(self)
 
 	local slots = {}
 
-	for index = 0, 35, 1 do
+	for index = 1, 36, 1 do
 		local name_prefix = 'slot_' .. index .. '_'
 		local prefab_clone = gui.clone_tree(slot_prefab)
 

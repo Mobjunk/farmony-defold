@@ -13,6 +13,7 @@ input_method = HiddenInputField
 
 [project]
 title = Farmony
+custom_resources = resources/
 
 [graphics]
 default_texture_min_filter = nearest
