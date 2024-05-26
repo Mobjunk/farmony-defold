@@ -37,11 +37,11 @@ function init(self)
 
 	local interaction_name = "idle"
 	local startDown = 1
-	local startUp = 29
-	local startRight = 57
-	local startLeft = 85
-	local totalFrames = 2
-	for index = 0, 13, 1 do
+	local startUp = 41
+	local startRight = 81
+	local startLeft = 121
+	local totalFrames = 4
+	for index = 0, 9, 1 do
 		local test =  [[
 			animations {
 				id: "]] .. interaction_name .. [[_down_]] .. index .. [["
