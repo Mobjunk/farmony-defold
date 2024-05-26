@@ -1,0 +1,38 @@
+path_settings {
+  path: "**"
+  profile: "atlas"
+}
+path_settings {
+  path: "/assets/**/*.atlas"
+  profile: "atlas"
+}
+path_settings {
+  path: "/assets/**/*.tilesource"
+  profile: "tilesource"
+}
+profiles {
+  name: "atlas"
+  platforms {
+    os: OS_ID_WEB
+    formats {
+      format: TEXTURE_FORMAT_RGBA_16BPP
+      compression_level: HIGH
+      compression_type: COMPRESSION_TYPE_WEBP
+    }
+    mipmaps: true
+    max_texture_size: 0
+    premultiply_alpha: true
+  }
+}
+profiles {
+  name: "tilesource"
+  platforms {
+    os: OS_ID_WEB
+    formats {
+      format: TEXTURE_FORMAT_RGBA_16BPP
+      compression_level: FAST
+      compression_type: COMPRESSION_TYPE_DEFAULT
+    }
+    mipmaps: false
+  }
+}

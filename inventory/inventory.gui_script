@@ -1,0 +1,117 @@
+---@diagnostic disable: missing-parameter
+local auto_layout = require('modules.utility.auto_layout')
+local character_info = require('modules.character.character_information')
+local animation_module = require('modules.utility.animations.animations')
+local animation = animation_module.new()
+
+local function handle_tab_switch(self, tab_to_open)
+	gui.set_enabled(self.opened_tab, false)
+	self.opened_tab = tab_to_open
+	gui.set_enabled(self.opened_tab, true)
+end
+
+local function handle_buttons(self)
+	animation.new_button('inventory_icon', function ()
+		print('Clicked inventory_icon')
+		handle_tab_switch(self, self.inventory_content)
+	end)
+
+	animation.new_button('character_head', function ()
+		print('Clicked character_head')
+		handle_tab_switch(self, self.character_content)
+	end)
+
+	animation.new_button('crafting_icon', function ()
+		print('Clicked crafting_icon')
+		handle_tab_switch(self, self.crafting_content)
+	end)
+
+	animation.new_button('star_icon', function ()
+		print('Clicked star_icon')
+		handle_tab_switch(self, self.collection_content)
+	end)
+
+	animation.new_button('settings_icon', function ()
+		print('Clicked settings_icon')
+		handle_tab_switch(self, self.settings_content)
+	end)
+
+	animation.new_button('quit_icon', function ()
+		print('Clicked quit_icon')
+		handle_tab_switch(self, self.quit_content)
+	end)
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	print('url inventory',msg.url())
+
+	handle_buttons(self)
+
+	self.inventory = gui.get_node('inventory')
+	gui.set_enabled(self.inventory, false)
+
+	local slot_prefab = gui.get_node('slot_prefab')
+	
+	self.inventory_content = gui.get_node('inventory_content')
+	self.character_content = gui.get_node('character_content')
+	self.crafting_content = gui.get_node('crafting_content')
+	self.collection_content = gui.get_node('collection_content')
+	self.settings_content = gui.get_node('settings_content')
+	self.quit_content = gui.get_node('quit_content')
+
+	self.opened_tab = self.inventory_content
+
+	local slots = {}
+
+	for index = 0, 35, 1 do
+		local name_prefix = 'slot_' .. index .. '_'
+		local prefab_clone = gui.clone_tree(slot_prefab)
+
+		local slot_name = name_prefix .. 'slot'
+		local highlight_name = name_prefix .. 'highlight'
+		local icon_name = name_prefix .. 'icon'
+		local optional_name = name_prefix .. 'optional'
+		local amount_name = name_prefix .. 'amount'
+		local durability_name = name_prefix .. 'durability'
+		local durability_amount_name = name_prefix .. 'durability_amount'
+		
+        gui.set_id(prefab_clone["slot_prefab"], slot_name)
+        gui.set_id(prefab_clone["slot_highlight"], highlight_name)
+        gui.set_id(prefab_clone["slot_icon"], icon_name)
+        gui.set_id(prefab_clone["slot_icon_optional"], optional_name)
+        gui.set_id(prefab_clone["slot_amount"], amount_name)
+        gui.set_id(prefab_clone["slot_durability"], durability_name)
+        gui.set_id(prefab_clone["slot_durability_amount"], durability_amount_name)
+	
+        gui.set_parent(gui.get_node(slot_name), self.inventory_content)
+
+		slots[#slots + 1] = slot_name
+	end
+
+	auto_layout.setup_grid('inventory_content', slots, vmath.vector3(32, 32, 1), 12, 0)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash('toggle') then
+		msg.post('inventory_bar_gui#inventory_bar', 'toggle')
+		if not gui.is_enabled(self.inventory, false) then
+			gui.set_enabled(self.opened_tab, true)
+			gui.set_enabled(self.inventory, true)
+			character_info.can_move = false
+		else
+			gui.set_enabled(self.opened_tab, false)
+			gui.set_enabled(self.inventory, false)
+			self.opened_tab = self.inventory_content
+			character_info.can_move = true
+		end
+	end
+end
+
+function on_input(self, action_id, action)
+	animation.on_input(action_id, action)
+end
+
+function update(self, dt)
+	animation.update(dt)
+end

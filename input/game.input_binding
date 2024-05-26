@@ -86,6 +86,10 @@ key_trigger {
   input: KEY_W
   action: "watering"
 }
+key_trigger {
+  input: KEY_E
+  action: "inventory"
+}
 mouse_trigger {
   input: MOUSE_BUTTON_1
   action: "touch"

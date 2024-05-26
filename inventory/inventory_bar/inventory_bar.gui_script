@@ -1,0 +1,77 @@
+---@diagnostic disable: missing-parameter
+local auto_layout = require('modules.utility.auto_layout')
+local character_info = require('modules.character.character_information')
+
+function init(self)
+	print('url inventory bar',msg.url())
+	self.inventory_bar = gui.get_node('inventory_bar')
+
+	local slot_prefab = gui.get_node('slot_prefab')
+	local parent = gui.get_node('inventory_bar_content')
+
+	local slots = {}
+	local indicatitors = {
+		'1',
+		'2',
+		'3',
+		'4',
+		'5',
+		'6',
+		'7',
+		'8',
+		'9',
+		'0',
+		'-',
+		'='
+	}
+
+	for index = 0, 11, 1 do
+		local name_prefix = 'slot_' .. index .. '_'
+		local prefab_clone = gui.clone_tree(slot_prefab)
+
+		local slot_name = name_prefix .. 'slot'
+		local highlight_name = name_prefix .. 'highlight'
+		local icon_name = name_prefix .. 'icon'
+		local optional_name = name_prefix .. 'optional'
+		local indication_name = name_prefix .. 'indication'
+		local amount_name = name_prefix .. 'amount'
+		local durability_name = name_prefix .. 'durability'
+		local durability_amount_name = name_prefix .. 'durability_amount'
+		
+        gui.set_id(prefab_clone["slot_prefab"], slot_name)
+        gui.set_id(prefab_clone["slot_highlight"], highlight_name)
+        gui.set_id(prefab_clone["slot_icon"], icon_name)
+        gui.set_id(prefab_clone["slot_icon_optional"], optional_name)
+        gui.set_id(prefab_clone["slot_indication"], indication_name)
+        gui.set_id(prefab_clone["slot_amount"], amount_name)
+        gui.set_id(prefab_clone["slot_durability"], durability_name)
+        gui.set_id(prefab_clone["slot_durability_amount"], durability_amount_name)
+	
+        gui.set_parent(gui.get_node(slot_name), parent)
+
+		gui.set_text(gui.get_node(indication_name), '' .. indicatitors[index + 1])
+
+		slots[#slots + 1] = slot_name
+	end
+
+	auto_layout.setup_grid('inventory_bar_content', slots, vmath.vector3(32, 32, 1), 12, 0)
+end
+
+function final(self)
+end
+
+function update(self, dt)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash('toggle') then
+		if not gui.is_enabled(self.inventory_bar, false) then
+			gui.set_enabled(self.inventory_bar, true)
+		else
+			gui.set_enabled(self.inventory_bar, false)
+		end
+	end
+end
+
+function on_input(self, action_id, action)
+end

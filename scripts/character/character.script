@@ -33,8 +33,33 @@ local function reset_all_animations(self)
 	end
 end
 
-function init(self)
+local function randomize_character(self)
+	math.randomseed(os.time())
+		
+	for index = 1, #character_info.looks.colors, 1 do
+		local max_number = (index == 1) and 7 or 9
+		character_info.looks.colors[index] = math.random(0, max_number)
+	end
 
+	for index = 1, #character_info.looks.style, 1 do
+		local max_number = 9
+		if index == 2 then
+			max_number = 7
+		elseif index == 3 then
+			max_number = 2
+		end
+		character_info.looks.style[index] = math.random(0, max_number)
+	end
+	
+	if character_info.looks.style[2] == 4 and character_info.looks.colors[2] > 8 then
+		character_info.looks.colors[2] = 8
+		print('Make sure that for sailor bow it cannot exceed 8')
+	end
+
+	reset_all_animations(self)
+end
+
+function init(self)
 	local interaction_name = "idle"
 	local startDown = 1
 	local startUp = 41
@@ -80,7 +105,7 @@ function init(self)
 				flip_vertical: 0
 			}
 			]]
-		print(test)
+		--print(test)
 		startDown = startDown + totalFrames
 		startUp = startUp + totalFrames
 		startRight = startRight + totalFrames
@@ -94,10 +119,12 @@ function init(self)
 		default = self.carry
 	end
 	character_animation.reset_animation("#body", default, true)
+	
+	randomize_character(self)
 end
 
 function update(self, dt)
-	if character_animation.animation_playing then
+	if character_animation.animation_playing or not character_info.can_move then
 		return
 	end
 
@@ -137,18 +164,20 @@ function update(self, dt)
 end
 
 function on_input(self, action_id, action)
-	if action_id == hash("down") then
-		character_info.direction = 'down'
-		self.dir.y = -1
-	elseif action_id == hash("up") then
-		character_info.direction = 'up'
-		self.dir.y = 1
-	elseif action_id == hash("left") then
-		character_info.direction = 'left'
-		self.dir.x = -1
-	elseif action_id == hash("right") then
-		character_info.direction = 'right'
-		self.dir.x = 1
+	if not character_animation.animation_playing and character_info.can_move then
+		if action_id == hash("down") then
+			character_info.direction = 'down'
+			self.dir.y = -1
+		elseif action_id == hash("up") then
+			character_info.direction = 'up'
+			self.dir.y = 1
+		elseif action_id == hash("left") then
+			character_info.direction = 'left'
+			self.dir.x = -1
+		elseif action_id == hash("right") then
+			character_info.direction = 'right'
+			self.dir.x = 1
+		end
 	end
 
 	if action_id == hash("pickaxe") and action.released then
@@ -182,31 +211,13 @@ function on_input(self, action_id, action)
 
 
 	if action_id == hash("randomize") and action.released then
-		math.randomseed(os.time())
-		
-		for index = 1, #character_info.looks.colors, 1 do
-			local max_number = (index == 1) and 7 or 9
-			character_info.looks.colors[index] = math.random(0, max_number)
-		end
-
-		for index = 1, #character_info.looks.style, 1 do
-			local max_number = 9
-			if index == 2 then
-				max_number = 7
-			elseif index == 3 then
-				max_number = 2
-			end
-			character_info.looks.style[index] = math.random(0, max_number)
-		end
-		
-		if character_info.looks.style[2] == 4 and character_info.looks.colors[2] > 8 then
-			character_info.looks.colors[2] = 8
-			print('Make sure that for sailor bow it cannot exceed 8')
-		end
-
-		reset_all_animations(self)
+		randomize_character(self)
 	end
 
+	--
+	if action_id == hash("inventory") and action.released then
+		msg.post('inventory_gui#inventory', "toggle");
+	end
 end
 
 function on_message(self, message_id, message, sender)
