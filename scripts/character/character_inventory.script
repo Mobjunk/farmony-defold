@@ -2,6 +2,7 @@ local item_definitions = require('modules.utility.item_definitions')
 local character_info = require('modules.character.character_information')
 local container_module = require('modules.container.container')
 local container = container_module.new()
+local item_snapper = require('modules.utility.item_snapper')
 
 local function container_updated()
 	local data = container.get_updated_items()
@@ -54,6 +55,33 @@ function on_message(self, message_id, message, sender)
 
 		msg.post('carry#character_carry', 'update_item', { item_id = container.items[message.slot].id })
 		msg.post('character#character', "reset_animations")
+	elseif message_id == hash('item_snap') then
 
+		if container.items[message.slot].id == -1 then
+			return
+		end
+
+		item_snapper.selected_item = container.items[message.slot]
+		item_snapper.selected_slot = message.slot
+		container.set(message.slot, {
+			id = -1,
+			amount = 0,
+			durability = -1,
+			max_durability = -1
+		}, true)
+		msg.post('tooltip_gui#inventory', 'reset_tooltip')
+		msg.post('item_snapper_gui#item_snapper', 'snap', { x = message.x, y = message.y })
+	elseif message_id == hash('item_swap') then
+		local item_data = container.items[message.slot]
+		if item_data.id == -1 then
+			container.set(message.slot, item_snapper.selected_item, true)
+		else
+			container.swap(item_snapper.selected_slot, message.slot, true)
+			container.set(message.slot, item_snapper.selected_item, true)
+		end
+		item_snapper.selected_item = nil
+		item_snapper.selected_slot = -1
+		msg.post('tooltip_gui#inventory', 'reset_tooltip')
+		msg.post('item_snapper_gui#item_snapper', 'reset')
 	end
 end

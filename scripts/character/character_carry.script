@@ -13,7 +13,6 @@ function on_message(self, message_id, message, sender)
         if not character_info.is_carrying then
             message.item_id = 0
         end
-        print('item_id',message.item_id)
         msg.post("#carry", "play_animation", {id = hash('' .. message.item_id)})
     end
 end

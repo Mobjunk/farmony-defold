@@ -1,0 +1,29 @@
+local item_snapper = require('modules.utility.item_snapper')
+
+function init(self)
+	print(msg.url())
+	msg.post(".", "acquire_input_focus")
+	self.item = gui.get_node('item')
+
+	gui.set_render_order(14)
+end
+
+function on_input(self, action_id, action)
+
+	if item_snapper.selected_item == nil then
+		gui.play_flipbook(self.item, '0')
+		return
+	end
+	
+	gui.play_flipbook(self.item, '' .. item_snapper.selected_item.id)
+	gui.set_position(self.item, vmath.vector3(action.x + 25, action.y - 25, 1))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash('snap') then
+		gui.play_flipbook(self.item, '' .. item_snapper.selected_item['id'])
+		gui.set_position(self.item, vmath.vector3(message.x + 25, message.y - 25, 1))
+	elseif message_id == hash('reset') then
+		gui.play_flipbook(self.item, '0')
+	end
+end

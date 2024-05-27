@@ -2,7 +2,10 @@
 local item_definitions = require('modules.utility.item_definitions')
 local auto_layout = require('modules.utility.auto_layout')
 
-local function update_slot(slot, item_data)
+local function update_slot(self, slot, item_data)
+	if slot > self.total_slots then
+		return
+	end
 	local definition = item_definitions.definitions[item_data.id]
 	local name_prefix = 'slot_' .. slot .. '_'
 	
@@ -12,14 +15,18 @@ local function update_slot(slot, item_data)
 	local durability_amount_name = name_prefix .. 'durability_amount'
 
 	gui.set_visible(gui.get_node(icon_name), item_data.id ~= -1)
-	gui.play_flipbook(gui.get_node(icon_name), ''..item_data.id)
+	
+	if item_data.id ~= -1 then
+		gui.play_flipbook(gui.get_node(icon_name), ''..item_data.id)
 
-	gui.set_visible(gui.get_node(amount_name), definition.stackable)
+		gui.set_visible(gui.get_node(amount_name), definition.stackable)
+		
+		gui.set_visible(gui.get_node(durability_name), item_data.durability ~= -1)
+		gui.set_visible(gui.get_node(durability_amount_name), item_data.durability ~= -1)
+	end
 	gui.set_text(gui.get_node(amount_name), '' .. item_data.amount)
 
 
-	gui.set_visible(gui.get_node(durability_name), item_data.durability ~= -1)
-	gui.set_visible(gui.get_node(durability_amount_name), item_data.durability ~= -1)
 end
 
 local function swap_highlighted_slot(self, new_slot)
@@ -100,7 +107,7 @@ function on_message(self, message_id, message, sender)
 		end
 	elseif message_id == hash('update_container') then
 		for _, data in pairs(message.items) do
-			update_slot(data.slot, data.item)
+			update_slot(self, data.slot, data.item)
 		end
 	elseif message_id == hash('selected_slot') then
 		swap_highlighted_slot(self, message.slot)
