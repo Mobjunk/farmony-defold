@@ -22,9 +22,17 @@ local function update_slot(slot, item_data)
 	gui.set_visible(gui.get_node(durability_amount_name), item_data.durability ~= -1)
 end
 
+local function swap_highlighted_slot(self, new_slot)
+	gui.set_visible(gui.get_node('slot_' .. self.selected_slot .. '_highlight'), false)
+	self.selected_slot = new_slot
+	gui.set_visible(gui.get_node('slot_' .. self.selected_slot .. '_highlight'), true)
+end
+
 function init(self)
 	msg.post(".", "acquire_input_focus")
 	print('url inventory bar',msg.url())
+
+	self.selected_slot = 1
 	self.inventory_bar = gui.get_node('inventory_bar')
 	self.total_slots = 12
 
@@ -73,6 +81,10 @@ function init(self)
 
 		gui.set_text(gui.get_node(indication_name), '' .. indicatitors[index])
 
+		if index == self.selected_slot then
+			gui.set_visible(gui.get_node(highlight_name), true)
+		end
+
 		slots[#slots + 1] = slot_name
 	end
 
@@ -90,19 +102,31 @@ function on_message(self, message_id, message, sender)
 		for _, data in pairs(message.items) do
 			update_slot(data.slot, data.item)
 		end
+	elseif message_id == hash('selected_slot') then
+		swap_highlighted_slot(self, message.slot)
 	end
 end
 
-function on_input(self, _, action)
+function on_input(self, action_id, action)
 	local is_hovering = false
 	for slot = 1, self.total_slots, 1 do
 		if gui.pick_node(gui.get_node('slot_' .. slot .. '_icon'), action.x, action.y) then
 			is_hovering = true
 			msg.post('character#character_inventory', "hovering_item", { slot = slot, mouse_x = action.x, mouse_y = action.y })
+			if action_id == hash('touch') and action.released then
+				msg.post('character#character_inventory', 'slot_swapped', { slot =  slot })
+				swap_highlighted_slot(self, slot)
+			end
 		end
 	end
 
 	if not is_hovering then
 		msg.post('tooltip_gui#inventory', 'reset_tooltip')
 	end
+
+	if action_id == hash("mouse_wheel_up") and action.value == 1 then
+		msg.post('character#character_inventory', "scroll_up", { current_slot = self.selected_slot })
+	elseif action_id == hash("mouse_wheel_down") and action.value == 1 then
+		msg.post('character#character_inventory', "scroll_down", { current_slot = self.selected_slot })
+    end
 end

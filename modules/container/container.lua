@@ -236,6 +236,30 @@ function container.new()
         return items
     end
 
+    function instance.get_next_occupied_slot(current_slot, increase)
+        current_slot = current_slot + (increase and 1 or -1)
+    
+        local tries = 0
+        local slot = current_slot
+    
+        while tries <= 12 do
+            if slot < 1 then
+                slot = 12
+            elseif slot > 12 then
+                slot = 1
+            end
+            
+            if instance.items[slot].id ~= -1 then
+                return slot
+            end
+    
+            slot = slot + (increase and 1 or -1)
+            tries = tries + 1
+        end
+    
+        return -1
+    end
+
     return instance
 end
 

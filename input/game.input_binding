@@ -55,42 +55,38 @@ key_trigger {
   action: "0"
 }
 key_trigger {
-  input: KEY_P
-  action: "pickaxe"
-}
-key_trigger {
-  input: KEY_C
-  action: "sword"
-}
-key_trigger {
-  input: KEY_V
-  action: "axe"
-}
-key_trigger {
-  input: KEY_F1
-  action: "carry"
-}
-key_trigger {
   input: KEY_SPACE
   action: "randomize"
-}
-key_trigger {
-  input: KEY_R
-  action: "rod"
-}
-key_trigger {
-  input: KEY_H
-  action: "hoe"
-}
-key_trigger {
-  input: KEY_W
-  action: "watering"
 }
 key_trigger {
   input: KEY_E
   action: "inventory"
 }
+key_trigger {
+  input: KEY_W
+  action: "up"
+}
+key_trigger {
+  input: KEY_A
+  action: "left"
+}
+key_trigger {
+  input: KEY_S
+  action: "down"
+}
+key_trigger {
+  input: KEY_D
+  action: "right"
+}
 mouse_trigger {
   input: MOUSE_BUTTON_1
   action: "touch"
+}
+mouse_trigger {
+  input: MOUSE_WHEEL_UP
+  action: "mouse_wheel_up"
+}
+mouse_trigger {
+  input: MOUSE_WHEEL_DOWN
+  action: "mouse_wheel_down"
 }

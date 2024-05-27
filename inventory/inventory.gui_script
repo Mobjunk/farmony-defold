@@ -126,6 +126,7 @@ function on_message(self, message_id, message, sender)
 			gui.set_enabled(self.inventory, false)
 			self.opened_tab = self.inventory_content
 			character_info.can_move = true
+			msg.post('tooltip_gui#inventory', 'reset_tooltip')
 		end
 	elseif message_id == hash('update_container') then
 		for _, data in pairs(message.items) do
@@ -135,6 +136,10 @@ function on_message(self, message_id, message, sender)
 end
 
 function on_input(self, action_id, action)
+	if not gui.is_enabled(self.inventory, false) then
+		return
+	end
+
 	animation.on_input(action_id, action)
 
 	local is_hovering = false

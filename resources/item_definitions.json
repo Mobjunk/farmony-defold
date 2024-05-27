@@ -16,5 +16,14 @@
     "stackable": false,
     "durability": -1,
     "tool_damage": -1
+  },
+  {
+    "id": 3,
+    "name": "Sword",
+    "description": "Description.",
+    "type": "Seed",
+    "stackable": false,
+    "durability": -1,
+    "tool_damage": -1
   }
 ]

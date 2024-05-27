@@ -1,4 +1,5 @@
 local item_definitions = require('modules.utility.item_definitions')
+local character_info = require('modules.character.character_information')
 local container_module = require('modules.container.container')
 local container = container_module.new()
 
@@ -14,6 +15,7 @@ function init(self)
 	container.initilize(36, container.stack_types.STANDARD, false, container_updated)
 	container.add(1)
 	container.add(2)
+	container.add(3)
 end
 
 function on_message(self, message_id, message, sender)
@@ -27,5 +29,31 @@ function on_message(self, message_id, message, sender)
 		container.remove(message.item_id, message.item_amount, message.allow_zero, message.prefered_slot)
 	elseif message_id == hash('hovering_item') then
 		msg.post('tooltip_gui#inventory', 'tooltip', { item = container.items[message.slot], mouse_x = message.mouse_x, mouse_y = message.mouse_y })
+	elseif message_id == hash('scroll_up') then
+		local next_slot = container.get_next_occupied_slot(message.current_slot, true)
+		local definition = item_definitions.definitions[container.items[next_slot].id]
+
+		character_info.is_carrying = definition.type == 'Object' or definition.type == 'Seed'
+
+		msg.post('carry#character_carry', 'update_item', { item_id = container.items[next_slot].id })
+		msg.post('character#character', "reset_animations")
+		msg.post('inventory_bar_gui#inventory_bar', 'selected_slot', { slot =  next_slot})
+	elseif message_id == hash('scroll_down') then
+		local next_slot = container.get_next_occupied_slot(message.current_slot, false)
+		local definition = item_definitions.definitions[container.items[next_slot].id]
+
+		character_info.is_carrying = definition.type == 'Object' or definition.type == 'Seed'
+
+		msg.post('carry#character_carry', 'update_item', { item_id = container.items[next_slot].id })
+		msg.post('character#character', "reset_animations")
+		msg.post('inventory_bar_gui#inventory_bar', 'selected_slot', { slot = next_slot })
+	elseif message_id == hash('slot_swapped') then
+		local definition = item_definitions.definitions[container.items[message.slot].id]
+
+		character_info.is_carrying = definition.type == 'Object' or definition.type == 'Seed'
+
+		msg.post('carry#character_carry', 'update_item', { item_id = container.items[message.slot].id })
+		msg.post('character#character', "reset_animations")
+
 	end
 end

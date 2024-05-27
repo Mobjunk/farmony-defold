@@ -1,0 +1,19 @@
+local character_info = require('modules.character.character_information')
+
+function init(self)
+	print(msg.url())
+end
+
+function on_input(self, action_id, action)
+
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash('update_item') then
+        if not character_info.is_carrying then
+            message.item_id = 0
+        end
+        print('item_id',message.item_id)
+        msg.post("#carry", "play_animation", {id = hash('' .. message.item_id)})
+    end
+end
