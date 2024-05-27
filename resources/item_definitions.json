@@ -3,6 +3,7 @@
     "id": 1,
     "name": "Pickaxe",
     "description": "Used to break stones.",
+    "type": "Tool",
     "stackable": false,
     "durability": -1,
     "tool_damage": -1
@@ -11,6 +12,7 @@
     "id": 2,
     "name": "Axe",
     "description": "Used to chop wood.",
+    "type": "Tool",
     "stackable": false,
     "durability": -1,
     "tool_damage": -1

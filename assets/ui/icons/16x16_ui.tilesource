@@ -1,4 +1,4 @@
-image: "/assets/ui/icons.png"
+image: "/assets/ui/icons/icons.png"
 tile_width: 16
 tile_height: 16
 tile_margin: 0

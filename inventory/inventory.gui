@@ -21,7 +21,7 @@ textures {
 }
 textures {
   name: "16x16_ui"
-  texture: "/assets/ui/16x16_ui.tilesource"
+  texture: "/assets/ui/icons/16x16_ui.tilesource"
 }
 background_color {
   x: 0.0

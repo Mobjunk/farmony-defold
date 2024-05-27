@@ -69,6 +69,7 @@ function init(self)
 
 	handle_buttons(self)
 
+	self.total_slots = 36
 	self.inventory = gui.get_node('inventory')
 	gui.set_enabled(self.inventory, false)
 
@@ -85,7 +86,7 @@ function init(self)
 
 	local slots = {}
 
-	for index = 1, 36, 1 do
+	for index = 1, self.total_slots, 1 do
 		local name_prefix = 'slot_' .. index .. '_'
 		local prefab_clone = gui.clone_tree(slot_prefab)
 
@@ -135,6 +136,18 @@ end
 
 function on_input(self, action_id, action)
 	animation.on_input(action_id, action)
+
+	local is_hovering = false
+	for slot = 1, self.total_slots, 1 do
+		if gui.pick_node(gui.get_node('slot_' .. slot .. '_icon'), action.x, action.y) then
+			is_hovering = true
+			msg.post('character#character_inventory', "hovering_item", { slot = slot, mouse_x = action.x, mouse_y = action.y })
+		end
+	end
+
+	if not is_hovering then
+		msg.post('tooltip_gui#inventory', 'reset_tooltip')
+	end
 end
 
 function update(self, dt)

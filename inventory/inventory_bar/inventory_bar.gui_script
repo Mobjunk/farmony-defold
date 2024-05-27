@@ -23,6 +23,7 @@ local function update_slot(slot, item_data)
 end
 
 function init(self)
+	msg.post(".", "acquire_input_focus")
 	print('url inventory bar',msg.url())
 	self.inventory_bar = gui.get_node('inventory_bar')
 	self.total_slots = 12
@@ -89,5 +90,19 @@ function on_message(self, message_id, message, sender)
 		for _, data in pairs(message.items) do
 			update_slot(data.slot, data.item)
 		end
+	end
+end
+
+function on_input(self, _, action)
+	local is_hovering = false
+	for slot = 1, self.total_slots, 1 do
+		if gui.pick_node(gui.get_node('slot_' .. slot .. '_icon'), action.x, action.y) then
+			is_hovering = true
+			msg.post('character#character_inventory', "hovering_item", { slot = slot, mouse_x = action.x, mouse_y = action.y })
+		end
+	end
+
+	if not is_hovering then
+		msg.post('tooltip_gui#inventory', 'reset_tooltip')
 	end
 end

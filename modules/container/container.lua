@@ -232,7 +232,6 @@ function container.new()
                 item = instance.items[instance.updated_slots[index]]
             }
         end
-        print('items',items)
         instance.updated_slots = { }
         return items
     end

@@ -9,6 +9,7 @@ local function container_updated()
 end
 
 function init(self)
+	print('url character inventory',msg.url())
 	item_definitions.initilize()
 	container.initilize(36, container.stack_types.STANDARD, false, container_updated)
 	container.add(1)
@@ -24,5 +25,7 @@ function on_message(self, message_id, message, sender)
 		message.allow_zero = message.allow_zero or false
 		message.prefered_slot = message.prefered_slot or -1
 		container.remove(message.item_id, message.item_amount, message.allow_zero, message.prefered_slot)
+	elseif message_id == hash('hovering_item') then
+		msg.post('tooltip_gui#inventory', 'tooltip', { item = container.items[message.slot], mouse_x = message.mouse_x, mouse_y = message.mouse_y })
 	end
 end

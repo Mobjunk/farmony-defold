@@ -29,8 +29,15 @@ function auto_layout.setup_panel(panel_prefix, panel_width, panel_height, horizo
         auto_layout.read_content(file_path, panel_prefix .. '_layout', panel_width - (horizontal_padding * 2), panel_height - (vertical_padding * 2), 'size')
         auto_layout.read_content(file_path, panel_prefix .. '_content', panel_width - (horizontal_padding * 2), panel_height - (vertical_padding * 2), 'size')
         auto_layout.read_content(file_path, panel_prefix .. '_content', 0, gui.get_size(panel_layout).y / 2, 'position')
-    end
-    
+    end 
+end
+
+function auto_layout.setup_content(panel_prefix, panel_width, panel_height, horizontal_padding, vertical_padding)
+    local panel = gui.get_node(panel_prefix)
+    local panel_content = gui.get_node(panel_prefix .. '_content')
+    gui.set_size(panel, vmath.vector3(panel_width, panel_height, 1))
+    gui.set_size(panel_content, vmath.vector3(panel_width - (horizontal_padding * 2), panel_height - (vertical_padding * 2), 1))
+    gui.set_position(panel_content, vmath.vector3(0, -vertical_padding, 0))
 end
 
 ---Getting the largest child within the parent
