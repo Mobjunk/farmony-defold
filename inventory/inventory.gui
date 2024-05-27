@@ -1813,7 +1813,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: "items/anim"
+  texture: "items/1"
   id: "slot_icon"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -1872,7 +1872,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: "items/anim"
+  texture: "items/1"
   id: "slot_icon_optional"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE

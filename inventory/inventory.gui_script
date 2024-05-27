@@ -1,8 +1,29 @@
 ---@diagnostic disable: missing-parameter
+local item_definitions = require('modules.utility.item_definitions')
 local auto_layout = require('modules.utility.auto_layout')
 local character_info = require('modules.character.character_information')
 local animation_module = require('modules.utility.animations.animations')
 local animation = animation_module.new()
+
+local function update_slot(slot, item_data)
+	local definition = item_definitions.definitions[item_data.id]
+	local name_prefix = 'slot_' .. slot .. '_'
+	
+	local icon_name = name_prefix .. 'icon'
+	local amount_name = name_prefix .. 'amount'
+	local durability_name = name_prefix .. 'durability'
+	local durability_amount_name = name_prefix .. 'durability_amount'
+
+	gui.set_visible(gui.get_node(icon_name), item_data.id ~= -1)
+	gui.play_flipbook(gui.get_node(icon_name), ''..item_data.id)
+
+	gui.set_visible(gui.get_node(amount_name), definition.stackable)
+	gui.set_text(gui.get_node(amount_name), '' .. item_data.amount)
+
+
+	gui.set_visible(gui.get_node(durability_name), item_data.durability ~= -1)
+	gui.set_visible(gui.get_node(durability_amount_name), item_data.durability ~= -1)
+end
 
 local function handle_tab_switch(self, tab_to_open)
 	gui.set_enabled(self.opened_tab, false)
@@ -104,6 +125,10 @@ function on_message(self, message_id, message, sender)
 			gui.set_enabled(self.inventory, false)
 			self.opened_tab = self.inventory_content
 			character_info.can_move = true
+		end
+	elseif message_id == hash('update_container') then
+		for _, data in pairs(message.items) do
+			update_slot(data.slot, data.item)
 		end
 	end
 end

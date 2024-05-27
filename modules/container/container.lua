@@ -12,7 +12,12 @@ function container.new()
         container_type = 'standard',
         allow_shifting = false,
         container_changed_callback = nil,
-        items = {}
+        items = {},
+        stack_types = {
+            STANDARD = 'standard',
+            ALWAYS_STACK = 'always stack'
+        },
+        updated_slots = {}
     }
 
     function instance.initilize(container_size, container_type, allow_shifting, container_changed_callback)
@@ -32,6 +37,7 @@ function container.new()
 
     function instance.set(slot, item_data, update)
         instance.items[slot] = item_data
+        instance.updated_slots[#instance.updated_slots + 1] = slot
         if update then
             instance.container_changed_callback()
         end
@@ -42,6 +48,9 @@ function container.new()
 
         instance.items[from] = instance.items[to]
         instance.items[to] = temp
+
+        instance.updated_slots[#instance.updated_slots + 1] = from
+        instance.updated_slots[#instance.updated_slots + 1] = to
         
         if update then
             instance.container_changed_callback()
@@ -49,6 +58,7 @@ function container.new()
     end
 
     function instance.add(item_id, item_amount)
+        item_amount = item_amount or 1
         if not instance.fits_container() then
             print('There is no room for the item ', item_id)
             return
@@ -56,7 +66,7 @@ function container.new()
 
         local new_slot = instance.get_free_slot()
         local stackable = item_definitions.definitions[item_id].stackable
-        if (stackable or instance.container_type == 'always stack') and instance.has_item(item_id, item_amount) then
+        if (stackable or instance.container_type == instance.stack_types.ALWAYS_STACK) and instance.has_item(item_id, item_amount) then
             print('Get existing slot for ',item_id)
             new_slot = instance.get_slot(item_id)
         end
@@ -78,9 +88,10 @@ function container.new()
                 return
             end
             item_data.amount = total_amount
+            instance.updated_slots[#instance.updated_slots + 1] = new_slot
 
         else
-            for _ = 0, item_amount, 1 do
+            for _ = 1, item_amount, 1 do
                 local free_slot = instance.get_free_slot()
                 if free_slot == -1 then
                     print('No more free slots were found...')
@@ -90,6 +101,7 @@ function container.new()
 
                 item_data.id = item_id
                 item_data.amount =  1
+                instance.updated_slots[#instance.updated_slots + 1] = free_slot
             end
         end
 
@@ -97,7 +109,9 @@ function container.new()
     end
 
     function instance.remove(item_id, item_amount, allow_zero, prefered_slot)
+        item_amount = item_amount or 1
         allow_zero = allow_zero or false
+        prefered_slot = prefered_slot or -1
         local slot = prefered_slot or -1
         if slot == -1 then
             slot = instance.get_slot(item_id)
@@ -117,7 +131,7 @@ function container.new()
             return
         end
 
-        if stackable or instance.container_type == 'always stack' then
+        if stackable or instance.container_type == instance.stack_types.ALWAYS_STACK then
             if item_data.amount > item_amount then
                 item_data.amount = item_data.amount - item_amount
             else
@@ -127,17 +141,23 @@ function container.new()
                 item_data.amount = 0
                 shift_contrainer = true
             end
+            instance.updated_slots[#instance.updated_slots + 1] = slot
         else
-            for _ = 0, #instance.items, 1 do
-                slot = prefered_slot or -1
-                if slot == -1 then
-                    slot = instance.get_slot(item_id)
+            for index = 1, item_amount, 1 do
+                slot = instance.get_slot(item_id)
+                if index == 1 and prefered_slot ~= -1 then
+                    local item_data = instance.items[prefered_slot]
+                    if item_data.id == item_id then
+                        slot = prefered_slot
+                    end
                 end
                 
                 if slot ~= -1 then
                     local item_data = instance.items[slot]
                     item_data.id = -1
                     item_data.amount = 0
+
+                    instance.updated_slots[#instance.updated_slots + 1] = slot
                 else
                     print('There is no item to remove ',item_id)
                 end
@@ -183,7 +203,7 @@ function container.new()
         for index = 1, #instance.items, 1 do
             local item_data = instance.items[index]
             if item_data.id == item_id then
-                return
+                return index
             end
         end
         return -1
@@ -202,6 +222,19 @@ function container.new()
                 print('slot: ' .. slot .. ' id: ' .. item.id .. ' amount: ' .. item.amount)
             end
         end
+    end
+
+    function instance.get_updated_items()
+        local items = {}
+        for index = 1, #instance.updated_slots, 1 do
+            items[#items + 1] = {
+                slot = instance.updated_slots[index],
+                item = instance.items[instance.updated_slots[index]]
+            }
+        end
+        print('items',items)
+        instance.updated_slots = { }
+        return items
     end
 
     return instance

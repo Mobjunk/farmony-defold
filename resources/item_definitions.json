@@ -1,6 +1,6 @@
 [
   {
-    "id": 0,
+    "id": 1,
     "name": "Pickaxe",
     "description": "Used to break stones.",
     "stackable": false,
@@ -8,7 +8,7 @@
     "tool_damage": -1
   },
   {
-    "id": 1,
+    "id": 2,
     "name": "Axe",
     "description": "Used to chop wood.",
     "stackable": false,

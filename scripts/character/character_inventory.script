@@ -3,34 +3,26 @@ local container_module = require('modules.container.container')
 local container = container_module.new()
 
 local function container_updated()
-	
+	local data = container.get_updated_items()
+	msg.post('inventory_bar_gui#inventory_bar', 'update_container', { items = data })
+	msg.post('inventory_gui#inventory', 'update_container', { items = data })
 end
 
 function init(self)
 	item_definitions.initilize()
-	container.initilize(36, 'standard', false, container_updated)
-	print('Add 10 axes')
-	container.add(1, 10)
-	container.print_container()
-	print('Remove 2 axes')
-	container.remove(1, 2, false, 3)
-	container.print_container()
-end
-
-function final(self)
-end
-
-function update(self, dt)
-end
-
-function fixed_update(self, dt)
+	container.initilize(36, container.stack_types.STANDARD, false, container_updated)
+	container.add(1)
+	container.add(2)
 end
 
 function on_message(self, message_id, message, sender)
-end
-
-function on_input(self, action_id, action)
-end
-
-function on_reload(self)
+	if message_id == hash('add') then
+		message.item_amount = message.item_amount or 1
+		container.add(message.item_id, message.item_amount)
+	elseif message_id == hash('remove') then
+		message.item_amount = message.item_amount or 1
+		message.allow_zero = message.allow_zero or false
+		message.prefered_slot = message.prefered_slot or -1
+		container.remove(message.item_id, message.item_amount, message.allow_zero, message.prefered_slot)
+	end
 end
