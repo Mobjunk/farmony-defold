@@ -54,37 +54,37 @@ local function get_pants_style(self)
 end
 
 local function get_tool_pants_style(self, action)
-    if action == 'pickaxe' then
+    if action == 'Pickaxe' then
         local styles = {
             self.skirt_pickaxe,
             self.suit_pickaxe
         }
 		return styles[character_looks.style[3]] or self.default_pickaxe
-	elseif action == 'axe' then
+	elseif action == 'Axe' then
         local styles = {
             self.skirt_axe,
             self.suit_axe
         }
 		return styles[character_looks.style[3]] or self.default_axe
-	elseif action == 'sword' then
+	elseif action == 'Sword' then
         local styles = {
             self.skirt_sword,
             self.suit_sword
         }
 		return styles[character_looks.style[3]] or self.default_sword
-	elseif action == 'rod' then
+	elseif action == 'Fishing rod' then
         local styles = {
             self.skirt_rod,
             self.suit_rod
         }
 		return styles[character_looks.style[3]] or self.default_rod
-	elseif action == 'hoe' then
+	elseif action == 'Hoe' then
         local styles = {
             self.skirt_hoe,
             self.suit_hoe
         }
 		return styles[character_looks.style[3]] or self.default_hoe
-	elseif action == 'watering' then
+	elseif action == 'Watering can' then
         local styles = {
             self.skirt_watering,
             self.suit_watering
@@ -95,41 +95,17 @@ local function get_tool_pants_style(self, action)
 end
 
 function init(self)
-	print(msg.url())
-	msg.post(".", "acquire_input_focus")
 	character_animation.reset_animation("#pants", get_pants_style(self), true)
 	default_pos = go.get_position()
-end
 
-function on_input(self, action_id, action)
-	if action_id == hash("pickaxe") and action.released then
-		character_animation.start_animation("#pants", get_tool_pants_style(self, 'pickaxe'))
-	end
-
-	if action_id == hash('axe') and action.released then
-		character_animation.start_animation("#pants", get_tool_pants_style(self, 'axe'))
-	end
-
-	if action_id == hash("sword") and action.released then
-		character_animation.start_animation("#pants", get_tool_pants_style(self, 'sword'))
-	end
-
-	if action_id == hash("rod") and action.released then
-		go.set_position(vmath.vector3(0, -4, 0))
-		character_animation.start_animation("#pants", get_tool_pants_style(self, 'rod'))
-	end
-
-	if action_id == hash("hoe") and action.released then
-		if character_info.direction == 'down' then
-			go.set_position(vmath.vector3(0, -7, 0))
-		end
-		character_animation.start_animation("#pants", get_tool_pants_style(self, 'hoe'))
-	end
-
-	if action_id == hash("watering") and action.released then
-		go.set_position(vmath.vector3(0, -5, 0))
-		character_animation.start_animation("#pants", get_tool_pants_style(self, 'watering'))
-	end
+	self.animations = {
+		Pickaxe = vmath.vector3(0, 0, 0),
+		Axe = vmath.vector3(0, 0, 0),
+		Sword = vmath.vector3(0, 0, 0),
+		['Fising rod'] = vmath.vector3(0, -4, 0),
+		Hoe = vmath.vector3(0, -7, 0),
+		['Watering can'] = vmath.vector3(0, -5, 0)
+	}
 end
 
 function on_message(self, message_id, message, sender)
@@ -137,6 +113,13 @@ function on_message(self, message_id, message, sender)
 		character_animation.reset_animation("#pants", get_pants_style(self), true)
 	elseif message_id == hash("animate") then
 		character_animation.play_animation("#pants", message.direction)
+	elseif message_id == hash('animate_character') then
+		character_animation.start_animation("#pants", get_tool_pants_style(self, message.name))
+		local position = self.animations[message.name]
+		if message.name == 'Hoe' and character_info.direction ~= 'down' then
+			position = vmath.vector3(0, -1, 0)
+		end
+		go.set_position(position)
 	end
 
 	character_animation.on_message(message_id, "#pants", get_pants_style(self), default_pos)

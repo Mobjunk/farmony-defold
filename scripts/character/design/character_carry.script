@@ -1,11 +1,6 @@
 local character_info = require('modules.character.character_information')
 
 function init(self)
-	print(msg.url())
-end
-
-function on_input(self, action_id, action)
-
 end
 
 function on_message(self, message_id, message, sender)

@@ -1,6 +1,7 @@
 local character_info = require('modules.character.character_information')
 local character_animation_module = require('modules.character.animation.character_animation')
 local character_animation = character_animation_module.new()
+local item_definitions = require('modules.utility.item_definitions')
 
 go.property("default", resource.tile_source("/assets/characters/walk/character.tilesource"))
 go.property("carry", resource.tile_source("/assets/characters/carrying/character_carry.tilesource"))
@@ -60,59 +61,6 @@ local function randomize_character(self)
 end
 
 function init(self)
-	print('url character',msg.url())
-	local interaction_name = "idle"
-	local startDown = 1
-	local startUp = 41
-	local startRight = 81
-	local startLeft = 121
-	local totalFrames = 4
-	for index = 0, 9, 1 do
-		local test =  [[
-			animations {
-				id: "]] .. interaction_name .. [[_down_]] .. index .. [["
-				start_tile: ]] .. startDown .. [[
-				end_tile: ]] .. startDown + (totalFrames - 1) .. [[
-				playback: PLAYBACK_ONCE_FORWARD
-				fps: ]] .. totalFrames .. [[
-				flip_horizontal: 0
-				flip_vertical: 0
-			}
-			animations {
-				id: "]] .. interaction_name .. [[_left_]] .. index .. [["
-				start_tile: ]] .. startLeft .. [[
-				end_tile: ]] .. startLeft + (totalFrames - 1) .. [[
-				playback: PLAYBACK_ONCE_FORWARD
-				fps: ]] .. totalFrames .. [[
-				flip_horizontal: 0
-				flip_vertical: 0
-			}
-			animations {
-				id: "]] .. interaction_name .. [[_right_]] .. index .. [["
-				start_tile: ]] .. startRight .. [[
-				end_tile: ]] .. startRight + (totalFrames - 1) .. [[
-				playback: PLAYBACK_ONCE_FORWARD
-				fps: ]] .. totalFrames .. [[
-				flip_horizontal: 0
-				flip_vertical: 0
-			}
-			animations {
-				id: "]] .. interaction_name .. [[_up_]] .. index .. [["
-				start_tile: ]] .. startUp .. [[
-				end_tile: ]] .. startUp + (totalFrames - 1) .. [[
-				playback: PLAYBACK_ONCE_FORWARD
-				fps: ]] .. totalFrames .. [[
-				flip_horizontal: 0
-				flip_vertical: 0
-			}
-			]]
-		--print(test)
-		startDown = startDown + totalFrames
-		startUp = startUp + totalFrames
-		startRight = startRight + totalFrames
-		startLeft = startLeft + totalFrames
-	end
-
     msg.post(".", "acquire_input_focus")
 	self.dir = vmath.vector3()
 	local default = self.default
@@ -120,6 +68,15 @@ function init(self)
 		default = self.carry
 	end
 	character_animation.reset_animation("#body", default, true)
+
+	self.animations = {
+		Pickaxe = self.pickaxe,
+		Axe = self.axe,
+		Sword = self.sword,
+		['Fising rod'] = self.rod,
+		Hoe = self.hoe,
+		['Watering can'] = self.watering
+	}
 	
 	randomize_character(self)
 end
@@ -181,41 +138,16 @@ function on_input(self, action_id, action)
 		end
 	end
 
-	if action_id == hash("pickaxe") and action.released then
-		character_animation.start_animation("#body", self.pickaxe)
+	if action_id == hash('touch') and action.released then
+		msg.post('inventory_bar_gui#inventory_bar', 'request_selected')
 	end
 
-	if action_id == hash('axe') and action.released then
-		character_animation.start_animation("#body", self.axe)
-	end
-
-	if action_id == hash("sword") and action.released then
-		character_animation.start_animation("#body", self.sword)
-	end
-
-	if action_id == hash("rod") and action.released then
-		character_animation.start_animation("#body", self.rod)
-	end
-
-	if action_id == hash("hoe") and action.released then
-		character_animation.start_animation("#body", self.hoe)
-	end
-
-	if action_id == hash("watering") and action.released then
-		character_animation.start_animation("#body", self.watering)
-	end
-
-	if action_id == hash("carry") and action.released then
-		character_info.is_carrying = not character_info.is_carrying
-		reset_all_animations(self)
-	end
-
-
+	--Handles randomizing the character
 	if action_id == hash("randomize") and action.released then
 		randomize_character(self)
 	end
 
-	--
+	--Handles sending a message to open up the inventory
 	if action_id == hash("inventory") and action.released then
 		msg.post('inventory_gui#inventory', "toggle");
 	end
@@ -224,6 +156,27 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == hash('reset_animations') then
 		reset_all_animations(self)
+	elseif message_id == hash('receive_selected') then
+		if character_animation.animation_playing or character_info.is_hovering_gui or not character_info.can_move then
+			return
+		end
+
+		local definition = item_definitions.definitions[message.item.id]
+
+		character_animation.start_animation("#body", self.animations[definition.name])
+
+		local urls = {
+			"shirt#character_shirt",
+			"pants#character_pants",
+			"shoes#character_shoes",
+			"eyes#character_eyes",
+			"hair#character_hair",
+			"body#character_body",
+			"tool#character_tool"
+		}
+		for _, value in pairs(urls) do
+			msg.post(value, "animate_character", { name = definition.name });
+		end
 	end
 
 	local default = self.default

@@ -21,7 +21,34 @@
     "id": 3,
     "name": "Sword",
     "description": "Description.",
-    "type": "Seed",
+    "type": "Tool",
+    "stackable": false,
+    "durability": -1,
+    "tool_damage": -1
+  },
+  {
+    "id": 4,
+    "name": "Watering can",
+    "description": "Description.",
+    "type": "Tool",
+    "stackable": false,
+    "durability": 100,
+    "tool_damage": -1
+  },
+  {
+    "id": 5,
+    "name": "Hoe",
+    "description": "Description.",
+    "type": "Tool",
+    "stackable": false,
+    "durability": -1,
+    "tool_damage": -1
+  },
+  {
+    "id": 6,
+    "name": "Scythe",
+    "description": "Description.",
+    "type": "Tool",
     "stackable": false,
     "durability": -1,
     "tool_damage": -1

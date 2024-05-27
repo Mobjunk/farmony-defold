@@ -11,12 +11,13 @@ local function container_updated()
 end
 
 function init(self)
-	print('url character inventory',msg.url())
 	item_definitions.initilize()
 	container.initilize(36, container.stack_types.STANDARD, false, container_updated)
 	container.add(1)
 	container.add(2)
 	container.add(3)
+	container.add(4)
+	container.add(5)
 end
 
 function on_message(self, message_id, message, sender)
@@ -83,5 +84,7 @@ function on_message(self, message_id, message, sender)
 		item_snapper.selected_slot = -1
 		msg.post('tooltip_gui#inventory', 'reset_tooltip')
 		msg.post('item_snapper_gui#item_snapper', 'reset')
+	elseif message_id == hash('send_selected') then
+		msg.post('character#character', 'receive_selected', { item = container.items[message.slot] })
 	end
 end

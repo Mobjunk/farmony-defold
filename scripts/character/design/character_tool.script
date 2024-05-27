@@ -1,0 +1,58 @@
+local character_animation_module = require('modules.character.animation.character_animation')
+local character_animation = character_animation_module.new()
+local character_info = require('modules.character.character_information')
+
+local default_pos
+
+go.property("default", resource.tile_source("/assets/characters/default_tool.tilesource"))
+go.property("pickaxe", resource.tile_source("/assets/characters/pickaxe/pickaxe.tilesource"))
+go.property("sword", resource.tile_source("/assets/characters/sword/sword.tilesource"))
+go.property("axe", resource.tile_source("/assets/characters/axe/axe.tilesource"))
+go.property("rod", resource.tile_source("/assets/characters/fishing/rod.tilesource"))
+go.property("hoe", resource.tile_source("/assets/characters/hoe/hoe.tilesource"))
+go.property("watering", resource.tile_source("/assets/characters/watering/watering.tilesource"))
+
+function init(self)
+	default_pos = go.get_position()
+
+	self.animations = {
+		Pickaxe = {
+			ref=self.pickaxe,
+			pos=vmath.vector3(0, 0, 0)
+		},
+		Axe = {
+			ref=self.axe,
+			pos=vmath.vector3(0, 0, 0)
+		},
+		Sword = {
+			ref=self.sword,
+			pos=vmath.vector3(0, 0, 0)
+		},
+		['Fising rod'] = {
+			ref=self.rod,
+			pos=vmath.vector3(0, -4, 0)
+		},
+		Hoe = {
+			ref=self.hoe,
+			pos=vmath.vector3(0, -7, 0)
+		},
+		['Watering can'] = {
+			ref=self.watering,
+			pos=vmath.vector3(0, -5, 0)
+		}
+	}
+end
+
+function on_message(self, message_id, message, sender)
+
+	if message_id == hash('animate_character') then
+		character_animation.start_animation("#tool", self.animations[message.name].ref)
+		local position = self.animations[message.name].pos
+		if message.name == 'Hoe' and character_info.direction ~= 'down' then
+			position = vmath.vector3(0, -1, 0)
+		end
+		go.set_position(position)
+	end
+
+	character_animation.on_message(message_id, "#tool", self.default, default_pos)
+end
