@@ -1,18 +1,18 @@
 key_trigger {
   input: KEY_DOWN
-  action: "down"
+  action: "down1"
 }
 key_trigger {
   input: KEY_UP
-  action: "up"
+  action: "up1"
 }
 key_trigger {
   input: KEY_LEFT
-  action: "left"
+  action: "left1"
 }
 key_trigger {
   input: KEY_RIGHT
-  action: "right"
+  action: "right1"
 }
 key_trigger {
   input: KEY_1
@@ -60,35 +60,35 @@ key_trigger {
 }
 key_trigger {
   input: KEY_E
-  action: "inventory"
+  action: "inventory1"
 }
 key_trigger {
   input: KEY_W
-  action: "up"
+  action: "up1"
 }
 key_trigger {
   input: KEY_A
-  action: "left"
+  action: "left1"
 }
 key_trigger {
   input: KEY_S
-  action: "down"
+  action: "down1"
 }
 key_trigger {
   input: KEY_D
-  action: "right"
+  action: "right1"
 }
 mouse_trigger {
   input: MOUSE_BUTTON_1
-  action: "perform_action"
+  action: "perform_action1"
 }
 mouse_trigger {
   input: MOUSE_WHEEL_UP
-  action: "mouse_wheel_up"
+  action: "mouse_wheel_up1"
 }
 mouse_trigger {
   input: MOUSE_WHEEL_DOWN
-  action: "mouse_wheel_down"
+  action: "mouse_wheel_down1"
 }
 gamepad_trigger {
   input: GAMEPAD_CONNECTED
@@ -129,4 +129,8 @@ gamepad_trigger {
 gamepad_trigger {
   input: GAMEPAD_LTRIGGER
   action: "mouse_wheel_down_controller"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_DOWN
+  action: "interact_controller"
 }

@@ -1,0 +1,28 @@
+function init(self)
+	print('virtual cursor ',msg.url())
+	self.virtual_mouse = gui.get_node('virtual_cursor')
+	gui.set_visible(self.virtual_mouse, false)
+
+	gui.set_render_order(15)
+end
+
+function update(self, dt)
+	if not gui.is_enabled(self.virtual_mouse, false) then
+		return
+	end
+
+	local position = gui.get_position(self.virtual_mouse)
+	msg.post('item_snapper_gui#item_snapper', 'cursor', { x = position.x, y = position.y })
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash('set') then
+		--print('message.x',message.x)
+		--print('message.y',message.y)
+		gui.set_position(self.virtual_mouse, vmath.vector3(message.x, message.y, 1))
+		gui.set_visible(self.virtual_mouse, true)
+	elseif message_id == hash('reset') then
+		gui.set_position(self.virtual_mouse, vmath.vector3(1920 / 2, 1080 / 2, 1))
+		gui.set_visible(self.virtual_mouse, false)
+	end
+end
