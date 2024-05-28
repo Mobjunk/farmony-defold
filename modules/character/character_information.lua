@@ -2,6 +2,8 @@ local character_looks = require('modules.character.character_looks')
 
 local character_info = {}
 
+character_info.controller_connected = true
+character_info.using_controller_settings = false
 character_info.is_hovering_gui = false
 character_info.can_move = true
 character_info.is_carrying = false

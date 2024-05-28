@@ -3,6 +3,8 @@ local item_definitions = require('modules.utility.item_definitions')
 local auto_layout = require('modules.utility.auto_layout')
 local character_info = require('modules.character.character_information')
 
+local switch_delay = 0
+
 local function update_slot(self, slot, item_data)
 	if slot > self.total_slots then
 		return
@@ -99,6 +101,12 @@ function init(self)
 	auto_layout.setup_grid('inventory_bar_content', slots, vmath.vector3(32, 32, 1), 12, 0)
 end
 
+function update(self, dt)
+	if switch_delay > 0 then
+		switch_delay = switch_delay - dt
+	end
+end
+
 function on_message(self, message_id, message, sender)
 	if message_id == hash('toggle') then
 		if not gui.is_enabled(self.inventory_bar, false) then
@@ -141,9 +149,31 @@ function on_input(self, action_id, action)
 		msg.post('tooltip_gui#inventory', 'reset_tooltip')
 	end
 
+	if action_id == hash("mouse_wheel_up_controller") and action.value == 1 then
+		if switch_delay > 0 then
+			return
+		end
+
+		msg.post('character#character_inventory', "scroll_up", { current_slot = self.selected_slot })
+		switch_delay = 0.2
+		character_info.using_controller_settings = true
+	elseif action_id == hash("mouse_wheel_down_controller") and action.value == 1 then
+		if switch_delay > 0 then
+			return
+		end
+
+		msg.post('character#character_inventory', "scroll_down", { current_slot = self.selected_slot })
+		switch_delay = 0.2
+		character_info.using_controller_settings = true
+    end
+
 	if action_id == hash("mouse_wheel_up") and action.value == 1 then
 		msg.post('character#character_inventory', "scroll_up", { current_slot = self.selected_slot })
+		switch_delay = 0
+		character_info.using_controller_settings = false
 	elseif action_id == hash("mouse_wheel_down") and action.value == 1 then
 		msg.post('character#character_inventory', "scroll_down", { current_slot = self.selected_slot })
+		switch_delay = 0
+		character_info.using_controller_settings = false
     end
 end

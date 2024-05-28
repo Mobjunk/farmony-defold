@@ -122,38 +122,85 @@ function update(self, dt)
 end
 
 function on_input(self, action_id, action)
+
+	if (action_id == hash("gamepad_connected") or action_id == hash("gamepad_disconnected")) and action.gamepad == 0 then
+		character_info.controller_connected = (action_id == hash("gamepad_connected"))
+		print('character_info.controller_connected',character_info.controller_connected)
+	end
+
+	if not character_animation.animation_playing and character_info.can_move then
+		if action_id == hash("down_controller") then
+			character_info.direction = 'down'
+			self.dir.y = -1
+			character_info.using_controller_settings = true
+		elseif action_id == hash("up_controller") then
+			character_info.direction = 'up'
+			self.dir.y = 1
+			character_info.using_controller_settings = true
+		elseif action_id == hash("left_controller") then
+			character_info.direction = 'left'
+			self.dir.x = -1
+			character_info.using_controller_settings = true
+		elseif action_id == hash("right_controller") then
+			character_info.direction = 'right'
+			self.dir.x = 1
+			character_info.using_controller_settings = true
+		end
+	end
+
+	if action_id == hash('perform_action_controller') and action.released then
+		msg.post('inventory_bar_gui#inventory_bar', 'request_selected')
+		character_info.using_controller_settings = true
+	end
+
+	--Handles sending a message to open up the inventory
+	if action_id == hash("inventory_controller") and action.released then
+		msg.post('inventory_gui#inventory', "toggle");
+		character_info.using_controller_settings = true
+	end
+
 	if not character_animation.animation_playing and character_info.can_move then
 		if action_id == hash("down") then
 			character_info.direction = 'down'
 			self.dir.y = -1
+			character_info.using_controller_settings = false
+			character_info.using_controller_settings = false
 		elseif action_id == hash("up") then
 			character_info.direction = 'up'
 			self.dir.y = 1
+			character_info.using_controller_settings = false
+			character_info.using_controller_settings = false
 		elseif action_id == hash("left") then
 			character_info.direction = 'left'
 			self.dir.x = -1
+			character_info.using_controller_settings = false
 		elseif action_id == hash("right") then
 			character_info.direction = 'right'
 			self.dir.x = 1
+			character_info.using_controller_settings = false
 		end
 	end
 
-	if action_id == hash('touch') and action.released then
+	if action_id == hash('perform_action') and action.released then
 		msg.post('inventory_bar_gui#inventory_bar', 'request_selected')
-	end
-
-	--Handles randomizing the character
-	if action_id == hash("randomize") and action.released then
-		randomize_character(self)
+		character_info.using_controller_settings = false
 	end
 
 	--Handles sending a message to open up the inventory
 	if action_id == hash("inventory") and action.released then
 		msg.post('inventory_gui#inventory', "toggle");
+		character_info.using_controller_settings = false
+	end
+
+	--Handles randomizing the character
+	if action_id == hash("randomize") and action.released then
+		randomize_character(self)
+		character_info.using_controller_settings = false
 	end
 end
 
 function on_message(self, message_id, message, sender)
+
 	if message_id == hash('reset_animations') then
 		reset_all_animations(self)
 	elseif message_id == hash('receive_selected') then

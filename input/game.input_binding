@@ -80,7 +80,7 @@ key_trigger {
 }
 mouse_trigger {
   input: MOUSE_BUTTON_1
-  action: "touch"
+  action: "perform_action"
 }
 mouse_trigger {
   input: MOUSE_WHEEL_UP
@@ -89,4 +89,44 @@ mouse_trigger {
 mouse_trigger {
   input: MOUSE_WHEEL_DOWN
   action: "mouse_wheel_down"
+}
+gamepad_trigger {
+  input: GAMEPAD_CONNECTED
+  action: "gamepad_connected"
+}
+gamepad_trigger {
+  input: GAMEPAD_DISCONNECTED
+  action: "gamepad_disconnected"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_LEFT
+  action: "left_controller"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_RIGHT
+  action: "right_controller"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_UP
+  action: "up_controller"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_DOWN
+  action: "down_controller"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_LEFT
+  action: "perform_action_controller"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_RIGHT
+  action: "inventory_controller"
+}
+gamepad_trigger {
+  input: GAMEPAD_RTRIGGER
+  action: "mouse_wheel_up_controller"
+}
+gamepad_trigger {
+  input: GAMEPAD_LTRIGGER
+  action: "mouse_wheel_down_controller"
 }
