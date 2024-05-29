@@ -1,4 +1,4 @@
-script: "/inventory/snap/item_snap.gui_script"
+script: "/gui/inventory/snap/item_snap.gui_script"
 textures {
   name: "items"
   texture: "/assets/items/items.tilesource"

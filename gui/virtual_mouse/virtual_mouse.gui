@@ -1,4 +1,4 @@
-script: "/virtual_mouse/virtual_mouse.gui_script"
+script: "/gui/virtual_mouse/virtual_mouse.gui_script"
 textures {
   name: "ui"
   texture: "/assets/ui/ui.atlas"

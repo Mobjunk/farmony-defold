@@ -1,4 +1,4 @@
-script: "/inventory/inventory_bar/inventory_bar.gui_script"
+script: "/gui/inventory/inventory_bar/inventory_bar.gui_script"
 fonts {
   name: "Munro"
   font: "/assets/fonts/Munro.font"

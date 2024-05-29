@@ -514,7 +514,7 @@ embedded_instances {
   id: "inventory_bar_gui"
   data: "components {\n"
   "  id: \"inventory_bar\"\n"
-  "  component: \"/inventory/inventory_bar/inventory_bar.gui\"\n"
+  "  component: \"/gui/inventory/inventory_bar/inventory_bar.gui\"\n"
   "  position {\n"
   "    x: 0.0\n"
   "    y: 0.0\n"
@@ -551,7 +551,7 @@ embedded_instances {
   id: "inventory_gui"
   data: "components {\n"
   "  id: \"inventory\"\n"
-  "  component: \"/inventory/inventory.gui\"\n"
+  "  component: \"/gui/inventory/inventory.gui\"\n"
   "  position {\n"
   "    x: 0.0\n"
   "    y: 0.0\n"
@@ -625,7 +625,7 @@ embedded_instances {
   id: "tooltip_gui"
   data: "components {\n"
   "  id: \"tooltip\"\n"
-  "  component: \"/tooltip/tooltip.gui\"\n"
+  "  component: \"/gui/tooltip/tooltip.gui\"\n"
   "  position {\n"
   "    x: 0.0\n"
   "    y: 0.0\n"
@@ -727,7 +727,7 @@ embedded_instances {
   id: "item_snapper_gui"
   data: "components {\n"
   "  id: \"item_snapper\"\n"
-  "  component: \"/inventory/snap/item_snap.gui\"\n"
+  "  component: \"/gui/inventory/snap/item_snap.gui\"\n"
   "  position {\n"
   "    x: 0.0\n"
   "    y: 0.0\n"
@@ -764,7 +764,44 @@ embedded_instances {
   id: "virtual_mouse"
   data: "components {\n"
   "  id: \"virtual_mouse\"\n"
-  "  component: \"/virtual_mouse/virtual_mouse.gui\"\n"
+  "  component: \"/gui/virtual_mouse/virtual_mouse.gui\"\n"
+  "  position {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "  }\n"
+  "  rotation {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "    w: 1.0\n"
+  "  }\n"
+  "  property_decls {\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale3 {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+}
+embedded_instances {
+  id: "character_design"
+  data: "components {\n"
+  "  id: \"character_design\"\n"
+  "  component: \"/gui/design/design.gui\"\n"
   "  position {\n"
   "    x: 0.0\n"
   "    y: 0.0\n"

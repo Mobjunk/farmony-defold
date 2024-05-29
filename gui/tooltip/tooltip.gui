@@ -1,4 +1,4 @@
-script: "/tooltip/tooltip.gui_script"
+script: "/gui/tooltip/tooltip.gui_script"
 fonts {
   name: "Munro"
   font: "/assets/fonts/Munro.font"
@@ -67,7 +67,7 @@ nodes {
   template_node_child: false
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
-  enabled: false
+  enabled: true
   visible: true
   material: ""
 }
