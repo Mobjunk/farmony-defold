@@ -129,28 +129,28 @@ function on_input(self, action_id, action)
 
 	end
 
-	if action_id == hash("down_controller") then
+	if action_id == hash("down_controller") and action.value > character_info.controller_deadzone then
 
 		if inventory.handle_controller_down(self) then
 			print('Handle controller down inventory')
 			return
 		end
 
-	elseif action_id == hash("up_controller") then
+	elseif action_id == hash("up_controller") and action.value > character_info.controller_deadzone then
 		
 		if inventory.handle_controller_up(self) then
 			print('Handle controller up inventory')
 			return
 		end
 
-	elseif action_id == hash("left_controller") then
+	elseif action_id == hash("left_controller") and action.value > character_info.controller_deadzone then
 
 		if inventory.handle_controller_left(self) then
 			print('Handle controller left inventory')
 			return
 		end
 
-	elseif action_id == hash("right_controller") then
+	elseif action_id == hash("right_controller") and action.value > character_info.controller_deadzone then
 
 		if inventory.handle_controller_right(self) then
 			print('Handle controller right inventory')
