@@ -1,0 +1,101 @@
+local navigation = require('modules.utility.navigation')
+local utility = require('modules.utility.utility')
+
+function init(self)
+	print('virtual keyboard',msg.url())
+	msg.post(".", "acquire_input_focus")
+
+	self.virtual_keyboard = gui.get_node('keyboard')
+	self.input_field = gui.get_node('input_entry')
+	self.shift_key = gui.get_node('key_41')
+	self.typed_string = ''
+	self.navigation_buttons = {}
+	self.caps_lock_enabled = false
+
+	self.return_sender = ''
+
+	gui.set_text(self.input_field, self.typed_string)
+
+	local num_rows = 5
+	local num_cols = 10
+	
+	for row = 1, num_rows do
+		for col = 1, num_cols do
+			local key_num = (row - 1) * num_cols + col
+			if key_num < 45 then
+				local key = 'key_' .. key_num
+				local up = (row > 1) and ('key_' .. ((row - 2) * num_cols + col)) or nil
+				local down = (row < num_rows and (row * num_cols + col) <= 44) and ('key_' .. (row * num_cols + col)) or nil
+				local left = (col > 1) and ('key_' .. ((row - 1) * num_cols + col - 1)) or nil
+				local right = (col < num_cols and ((row - 1) * num_cols + col + 1) <= 44) and ('key_' .. ((row - 1) * num_cols + col + 1)) or nil
+				navigation.add_navigation_button(self, key, up, right, down, left, function ()
+					local keys = {
+						'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+						'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
+						'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', "'",
+						'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '?',
+						'shift', ' ', 'backspace', 'enter'
+					}
+					local pressed_key = keys[key_num]
+					if pressed_key == 'shift' then
+						self.caps_lock_enabled = not self.caps_lock_enabled
+						gui.set_color(self.shift_key, utility.color(210, 208, 208))
+						return
+					end
+
+					if pressed_key == 'backspace' then
+						self.typed_string = string.sub(self.typed_string, 1, -2)
+						gui.set_text(self.input_field, self.typed_string)
+						return
+					end
+
+					if pressed_key == 'enter' then
+						print('Finished typing...')
+						msg.post(self.return_sender, "finished_typing", { message = self.typed_string })
+						gui.set_enabled(self.virtual_keyboard, false)
+						return
+					end
+
+					if self.caps_lock_enabled then
+						pressed_key = string.upper(pressed_key)
+						self.caps_lock_enabled = false
+						gui.set_color(self.shift_key, utility.color(255, 255, 255))
+					end
+
+					self.typed_string = self.typed_string .. pressed_key
+					gui.set_text(self.input_field, self.typed_string)
+				end)
+			end
+		end
+	end
+
+end
+
+function final(self)
+end
+
+function update(self, dt)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash('toggle') then
+		if not gui.is_enabled(self.virtual_keyboard, false) then
+			gui.set_enabled(self.virtual_keyboard, true)
+			self.typed_string = ''
+			self.return_sender = message.url
+			gui.set_text(self.input_field, self.typed_string)
+			navigation.set_selected('key_1')
+		else
+			gui.set_enabled(self.virtual_keyboard, false)
+		end
+	end
+end
+
+function on_input(self, action_id, action)
+	
+	if not gui.is_enabled(self.virtual_keyboard, false) then
+		return
+	end
+
+	navigation.handle_navigation(self, action_id, action)
+end

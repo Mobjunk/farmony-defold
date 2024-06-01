@@ -222,6 +222,9 @@ end
 ---@param new_y number The new y size
 ---@param method string What vaule is gonna be changed ('size'/'position')
 function auto_layout.read_content(file_path, id_to_find, new_x, new_y, method)
+    if file_path == '' then
+        return
+    end
     local file = io.open(file_path, "r")
 
     if file then

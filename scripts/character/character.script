@@ -194,8 +194,9 @@ function on_input(self, action_id, action)
 
 	--Handles randomizing the character
 	if action_id == hash("randomize") and action.released then
-		randomize_character(self)
-		character_info.using_controller_settings = false
+		msg.post('character_design#character_design', 'toggle')
+		--randomize_character(self)
+		--character_info.using_controller_settings = false
 	end
 end
 
