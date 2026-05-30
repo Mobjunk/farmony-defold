@@ -132,7 +132,8 @@ function on_input(self, action_id, action)
 
 	local is_hovering = false
 	for slot = 1, self.total_slots, 1 do
-		if gui.pick_node(gui.get_node('slot_' .. slot .. '_icon'), action.x, action.y) then
+		local node = gui.get_node('slot_' .. slot .. '_icon')
+		if action.x and gui.pick_node(node, action.x, action.y) then
 			is_hovering = true
 			character_info.is_hovering_gui = true
 			msg.post('character#character_inventory', "hovering_item", { slot = slot, mouse_x = action.x, mouse_y = action.y })
@@ -142,7 +143,6 @@ function on_input(self, action_id, action)
 			end
 		end
 	end
-
 	
 	if not is_hovering then
 		character_info.is_hovering_gui = false
