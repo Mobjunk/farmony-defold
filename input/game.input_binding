@@ -78,17 +78,25 @@ key_trigger {
   input: KEY_D
   action: "right"
 }
+key_trigger {
+  input: KEY_BACKSPACE
+  action: "backspace"
+}
+key_trigger {
+  input: KEY_ENTER
+  action: "enter"
+}
 mouse_trigger {
   input: MOUSE_BUTTON_1
-  action: "perform_action1"
+  action: "perform_action"
 }
 mouse_trigger {
   input: MOUSE_WHEEL_UP
-  action: "mouse_wheel_up1"
+  action: "mouse_wheel_up"
 }
 mouse_trigger {
   input: MOUSE_WHEEL_DOWN
-  action: "mouse_wheel_down1"
+  action: "mouse_wheel_down"
 }
 gamepad_trigger {
   input: GAMEPAD_CONNECTED
@@ -133,14 +141,6 @@ gamepad_trigger {
 gamepad_trigger {
   input: GAMEPAD_RPAD_DOWN
   action: "interact_controller"
-}
-key_trigger {
-  input: KEY_BACKSPACE
-  action: "backspace"
-}
-key_trigger {
-  input: KEY_ENTER
-  action: "enter"
 }
 text_trigger {
   input: TEXT

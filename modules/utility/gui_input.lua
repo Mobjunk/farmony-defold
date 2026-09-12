@@ -6,7 +6,6 @@ local gui_input = {}
 local MOUSE_CLICK = {
 	[hash("touch")] = true,
 	[hash("perform_action")] = true,
-	[hash("perform_action1")] = true,
 }
 
 local function is_controller_action(action_id)
