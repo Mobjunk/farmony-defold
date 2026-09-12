@@ -105,7 +105,9 @@ end
 
 function navigation.set_selected(selected)
 	navigation.selected_node = selected
-	move_virtual_mouse_to_node(navigation.selected_node)
+	if character_info.using_controller_settings then
+		move_virtual_mouse_to_node(navigation.selected_node)
+	end
 end
 
 function navigation.add_navigation_button(self, node_name, up_node, right_node, down_node, left_node, callback)

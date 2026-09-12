@@ -1,10 +1,60 @@
 local auto_layout = require("modules.utility.auto_layout")
 local character_info = require("modules.character.character_information")
 local character_looks = require("modules.character.character_looks")
+local gui_input = require("modules.utility.gui_input")
 local navigation = require("modules.utility.navigation")
 
 local selected_input_field = ""
 local selected_input_field_text = ""
+local INPUT_PLACEHOLDERS = {
+	name_input_entry = "Name...",
+	farm_name_input_entry = "Farm name...",
+	favorite_thing_input_entry = "Fav. thing...",
+}
+local INPUT_FIELD_FOR_TEXT = {
+	name_input_entry = "name_input_field",
+	farm_name_input_entry = "farm_name_input_field",
+	favorite_thing_input_entry = "favorite_thing_input_field",
+}
+local INPUT_CLIP_FOR_TEXT = {
+	name_input_entry = "name_input_clip",
+	farm_name_input_entry = "farm_name_input_clip",
+	favorite_thing_input_entry = "favorite_thing_input_clip",
+}
+local INPUT_CLIP_PADDING = 3
+
+local function setup_input_clip(field_id, clip_id)
+	local field = gui.get_node(field_id)
+	local clip = gui.get_node(clip_id)
+	local size = gui.get_size(field)
+	gui.set_size(clip, vmath.vector3(size.x - INPUT_CLIP_PADDING * 2, size.y - 2, 0))
+	gui.set_position(clip, vmath.vector3(INPUT_CLIP_PADDING, -1, 0))
+end
+
+local function layout_input_text(text_id)
+	local clip_id = INPUT_CLIP_FOR_TEXT[text_id]
+	if clip_id == nil then
+		return
+	end
+	local text_node = gui.get_node(text_id)
+	local clip_node = gui.get_node(clip_id)
+	local metrics = gui.get_text_metrics_from_node(text_node)
+	local scale = gui.get_scale(text_node)
+	local text_width = metrics.width * scale.x
+	local available = gui.get_size(clip_node).x
+	local pos = gui.get_position(text_node)
+	if text_width > available then
+		pos.x = available - text_width
+	else
+		pos.x = 0
+	end
+	gui.set_position(text_node, pos)
+end
+
+local function set_input_text(text_id, text)
+	gui.set_text(gui.get_node(text_id), text)
+	layout_input_text(text_id)
+end
 
 local rotation_index = 1
 local background_index = 1
@@ -12,6 +62,7 @@ local max_background_index = 8
 local beard_style = 0
 local max_beard_style = 0
 local looks_snapshot
+local unfocus_input
 
 local function player_looks()
 	return character_info.looks
@@ -54,6 +105,8 @@ local function close_design(apply)
 		character_looks.apply(player_looks(), looks_snapshot)
 	end
 	looks_snapshot = nil
+	unfocus_input()
+	msg.post("virtual_mouse#virtual_mouse", "reset")
 	character_info.can_move = true
 	notify_character()
 end
@@ -61,9 +114,15 @@ end
 local function open_design()
 	looks_snapshot = character_looks.snapshot(player_looks())
 	gui.set_enabled(gui.get_node("root"), true)
+	if not character_info.using_controller_settings then
+		msg.post("virtual_mouse#virtual_mouse", "reset")
+	end
 	navigation.set_selected("arrow_rotate_left")
 	character_info.can_move = false
 	preview()
+	for text_id, _ in pairs(INPUT_FIELD_FOR_TEXT) do
+		layout_input_text(text_id)
+	end
 end
 
 local function rotate_player(value)
@@ -76,22 +135,64 @@ local function swap_background(value)
 	gui.play_flipbook(gui.get_node("character_background"), "" .. background_index)
 end
 
-local function open_name()
-	msg.post("virtual_keyboard#virtual_keyboard", "toggle", { url = "character_design#character_design" })
-	selected_input_field = "name_input_field"
-	selected_input_field_text = "name_input_entry"
+unfocus_input = function()
+	if selected_input_field_text == "" then
+		return
+	end
+	local node = gui.get_node(selected_input_field_text)
+	if gui.get_text(node) == "" then
+		set_input_text(selected_input_field_text, INPUT_PLACEHOLDERS[selected_input_field_text] or "")
+	else
+		layout_input_text(selected_input_field_text)
+	end
+	gui.set_color(gui.get_node(selected_input_field), vmath.vector4(1, 1, 1, 1))
+	selected_input_field = ""
+	selected_input_field_text = ""
 end
 
-local function open_farm_name()
-	msg.post("virtual_keyboard#virtual_keyboard", "toggle", { url = "character_design#character_design" })
-	selected_input_field = "farm_name_input_field"
-	selected_input_field_text = "farm_name_input_entry"
+local function focus_input(field, text_id)
+	if selected_input_field == field then
+		return
+	end
+	unfocus_input()
+	selected_input_field = field
+	selected_input_field_text = text_id
+	local node = gui.get_node(text_id)
+	if gui.get_text(node) == INPUT_PLACEHOLDERS[text_id] then
+		set_input_text(text_id, "")
+	else
+		layout_input_text(text_id)
+	end
+	gui.set_color(gui.get_node(field), vmath.vector4(1, 1, 0.85, 1))
 end
 
-local function open_fav_thing()
-	msg.post("virtual_keyboard#virtual_keyboard", "toggle", { url = "character_design#character_design" })
-	selected_input_field = "favorite_thing_input_field"
-	selected_input_field_text = "favorite_thing_input_entry"
+local function activate_input(field, text_id)
+	if character_info.using_controller_settings then
+		unfocus_input()
+		msg.post("virtual_keyboard#virtual_keyboard", "toggle", { url = "character_design#character_design" })
+		selected_input_field = field
+		selected_input_field_text = text_id
+	else
+		focus_input(field, text_id)
+	end
+end
+
+local function handle_text_input(action_id, action)
+	if character_info.using_controller_settings or selected_input_field_text == "" then
+		return
+	end
+
+	local node = gui.get_node(selected_input_field_text)
+	local text = gui.get_text(node)
+	if action_id == hash("text") and action.text ~= nil and action.text ~= "" then
+		if string.byte(action.text) >= 32 then
+			set_input_text(selected_input_field_text, text .. action.text)
+		end
+	elseif action_id == hash("backspace") and (action.pressed or action.repeated) then
+		set_input_text(selected_input_field_text, string.sub(text, 1, -2))
+	elseif action_id == hash("enter") and action.released then
+		unfocus_input()
+	end
 end
 
 local function swap_hair(value)
@@ -160,6 +261,11 @@ function init(self)
 
 	preview()
 
+	for text_id, field_id in pairs(INPUT_FIELD_FOR_TEXT) do
+		setup_input_clip(field_id, INPUT_CLIP_FOR_TEXT[text_id])
+		layout_input_text(text_id)
+	end
+
 	auto_layout.setup_layout("vertical", { "name_content", "farm_name_content", "favorite_thing_content" }, 6.5, "", "")
 	auto_layout.setup_layout("vertical", { "hair_content", "beard_content", "shirt_content", "pants_content", "shoes_content" }, 0, "", "")
 	auto_layout.setup_layout("vertical", { "skin_content", "hair_color_content", "shirt_color_content", "pants_color_content", "eyes_content" }, 0, "", "")
@@ -177,9 +283,15 @@ function init(self)
 		swap_background(1)
 	end)
 
-	navigation.add_focusable(self, "name_input_field", open_name)
-	navigation.add_focusable(self, "farm_name_input_field", open_farm_name)
-	navigation.add_focusable(self, "favorite_thing_input_field", open_fav_thing)
+	navigation.add_focusable(self, "name_input_field", function()
+		activate_input("name_input_field", "name_input_entry")
+	end)
+	navigation.add_focusable(self, "farm_name_input_field", function()
+		activate_input("farm_name_input_field", "farm_name_input_entry")
+	end)
+	navigation.add_focusable(self, "favorite_thing_input_field", function()
+		activate_input("favorite_thing_input_field", "favorite_thing_input_entry")
+	end)
 
 	navigation.add_focusable(self, "hair_left_arrow", function()
 		swap_hair(-1)
@@ -261,7 +373,15 @@ function on_message(self, message_id, message, sender)
 			close_design(false)
 		end
 	elseif message_id == hash("finished_typing") then
-		gui.set_text(gui.get_node(selected_input_field_text), message.message)
+		local text = message.message or ""
+		if text == "" then
+			text = INPUT_PLACEHOLDERS[selected_input_field_text] or ""
+		end
+		gui.set_text(gui.get_node(selected_input_field_text), text)
+		layout_input_text(selected_input_field_text)
+		if not character_info.using_controller_settings then
+			msg.post("virtual_mouse#virtual_mouse", "reset")
+		end
 		navigation.set_selected(selected_input_field)
 		selected_input_field = ""
 		selected_input_field_text = ""
@@ -273,5 +393,14 @@ function on_input(self, action_id, action)
 		return
 	end
 
-	navigation.handle_navigation(self, action_id, action)
+	handle_text_input(action_id, action)
+
+	if gui_input.is_mouse_click(action_id, action) and selected_input_field ~= "" and not character_info.using_controller_settings then
+		if not gui.pick_node(gui.get_node(selected_input_field), action.x, action.y) then
+			unfocus_input()
+		end
+	end
+
+	gui_input.handle(self, action_id, action)
+	return true
 end

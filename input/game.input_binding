@@ -134,3 +134,15 @@ gamepad_trigger {
   input: GAMEPAD_RPAD_DOWN
   action: "interact_controller"
 }
+key_trigger {
+  input: KEY_BACKSPACE
+  action: "backspace"
+}
+key_trigger {
+  input: KEY_ENTER
+  action: "enter"
+}
+text_trigger {
+  input: TEXT
+  action: "text"
+}
