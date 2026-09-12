@@ -9,7 +9,7 @@ local function update_slot(self, slot, item_data)
 	if slot > self.total_slots then
 		return
 	end
-	local definition = item_definitions.definitions[item_data.id]
+	local definition = item_definitions.get(item_data.id)
 	local name_prefix = 'slot_' .. slot .. '_'
 	
 	local icon_name = name_prefix .. 'icon'

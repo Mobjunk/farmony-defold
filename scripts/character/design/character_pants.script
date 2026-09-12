@@ -1,9 +1,4 @@
-local character_info = require('modules.character.character_information')
-local character_looks = require('modules.character.character_looks')
-local character_animation_module = require('modules.character.animation.character_animation')
-local character_animation = character_animation_module.new()
-
-local default_pos
+local character_layer = require("modules.character.character_layer")
 
 go.property("default", resource.tile_source("/assets/characters/walk/clothes/pants/pants.tilesource"))
 go.property("suit", resource.tile_source("/assets/characters/walk/clothes/pants/pants_suit.tilesource"))
@@ -37,90 +32,15 @@ go.property("default_watering", resource.tile_source("/assets/characters/waterin
 go.property("suit_watering", resource.tile_source("/assets/characters/watering/clothes/pants/pants_suit_watering.tilesource"))
 go.property("skirt_watering", resource.tile_source("/assets/characters/watering/clothes/pants/skirt_watering.tilesource"))
 
-local function get_pants_style(self)
-    if character_info.is_carrying then
-		local styles = {
-			self.skirt_carry,
-			self.suit_carry
-		}
-		return styles[character_looks.style[3]] or self.default_carry
-	else
-		local styles = {
-			self.skirt,
-			self.suit
-		}
-		return styles[character_looks.style[3]] or self.default
-	end
-end
-
-local function get_tool_pants_style(self, action)
-    if action == 'Pickaxe' then
-        local styles = {
-            self.skirt_pickaxe,
-            self.suit_pickaxe
-        }
-		return styles[character_looks.style[3]] or self.default_pickaxe
-	elseif action == 'Axe' then
-        local styles = {
-            self.skirt_axe,
-            self.suit_axe
-        }
-		return styles[character_looks.style[3]] or self.default_axe
-	elseif action == 'Sword' then
-        local styles = {
-            self.skirt_sword,
-            self.suit_sword
-        }
-		return styles[character_looks.style[3]] or self.default_sword
-	elseif action == 'Fishing rod' then
-        local styles = {
-            self.skirt_rod,
-            self.suit_rod
-        }
-		return styles[character_looks.style[3]] or self.default_rod
-	elseif action == 'Hoe' then
-        local styles = {
-            self.skirt_hoe,
-            self.suit_hoe
-        }
-		return styles[character_looks.style[3]] or self.default_hoe
-	elseif action == 'Watering can' then
-        local styles = {
-            self.skirt_watering,
-            self.suit_watering
-        }
-		return styles[character_looks.style[3]] or self.default_watering
-    end
-    return self.default_pickaxe
-end
+local layer = character_layer.create({
+	sprite_url = "#pants",
+	style_kind = "pants",
+})
 
 function init(self)
-	character_animation.reset_animation("#pants", get_pants_style(self), true)
-	default_pos = go.get_position()
-
-	self.animations = {
-		Pickaxe = vmath.vector3(0, 0, 0),
-		Axe = vmath.vector3(0, 0, 0),
-		Sword = vmath.vector3(0, 0, 0),
-		['Fising rod'] = vmath.vector3(0, -4, 0),
-		Hoe = vmath.vector3(0, -7, 0),
-		['Watering can'] = vmath.vector3(0, -5, 0)
-	}
+	layer.init(self)
 end
 
 function on_message(self, message_id, message, sender)
-	if message_id == hash('reset_animation') then
-		character_animation.reset_animation("#pants", get_pants_style(self), true)
-	elseif message_id == hash("animate") then
-		character_animation.play_animation("#pants", message.direction)
-	elseif message_id == hash('animate_character') then
-		character_animation.start_animation("#pants", get_tool_pants_style(self, message.name))
-		local position = self.animations[message.name]
-		if message.name == 'Hoe' and character_info.direction ~= 'down' then
-			position = vmath.vector3(0, -1, 0)
-		end
-		go.set_position(position)
-	end
-
-	character_animation.on_message(message_id, "#pants", get_pants_style(self), default_pos)
+	layer.on_message(self, message_id, message)
 end

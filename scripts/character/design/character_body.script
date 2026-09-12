@@ -1,8 +1,4 @@
-local character_info = require('modules.character.character_information')
-local character_animation_module = require('modules.character.animation.character_animation')
-local character_animation = character_animation_module.new()
-
-local default_pos
+local character_layer = require("modules.character.character_layer")
 
 go.property("default", resource.tile_source("/assets/characters/walk/character.tilesource"))
 go.property("carry", resource.tile_source("/assets/characters/carrying/character_carry.tilesource"))
@@ -13,62 +9,14 @@ go.property("rod", resource.tile_source("/assets/characters/fishing/character_ro
 go.property("hoe", resource.tile_source("/assets/characters/hoe/character_hoe.tilesource"))
 go.property("watering", resource.tile_source("/assets/characters/watering/character_watering.tilesource"))
 
+local layer = character_layer.create({
+	sprite_url = "#body",
+})
+
 function init(self)
-	default_pos = go.get_position()
-
-	local default = self.default
-	if character_info.is_carrying then
-		default = self.carry
-	end
-	character_animation.reset_animation("#body", default, true)
-
-	self.animations = {
-		Pickaxe = {
-			ref=self.pickaxe,
-			pos=vmath.vector3(0, 0, 0)
-		},
-		Axe = {
-			ref=self.axe,
-			pos=vmath.vector3(0, 0, 0)
-		},
-		Sword = {
-			ref=self.sword,
-			pos=vmath.vector3(0, 0, 0)
-		},
-		['Fising rod'] = {
-			ref=self.rod,
-			pos=vmath.vector3(0, -4, 0)
-		},
-		Hoe = {
-			ref=self.hoe,
-			pos=vmath.vector3(0, -7, 0)
-		},
-		['Watering can'] = {
-			ref=self.watering,
-			pos=vmath.vector3(0, -5, 0)
-		}
-	}
-
+	layer.init(self)
 end
 
 function on_message(self, message_id, message, sender)
-	local default = self.default
-	if character_info.is_carrying then
-		default = self.carry
-	end
-
-	if message_id == hash('reset_animation') then
-		character_animation.reset_animation("#body", default, true)
-	elseif message_id == hash("animate") then
-		character_animation.play_animation("#body", message.direction)
-	elseif message_id == hash('animate_character') then
-		character_animation.start_animation("#body", self.animations[message.name].ref)
-		local position = self.animations[message.name].pos
-		if message.name == 'Hoe' and character_info.direction ~= 'down' then
-			position = vmath.vector3(0, -1, 0)
-		end
-		go.set_position(position)
-	end
-
-	character_animation.on_message(message_id, "#body", default, default_pos)
+	layer.on_message(self, message_id, message)
 end

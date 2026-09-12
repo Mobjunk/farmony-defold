@@ -1,235 +1,206 @@
-local character_info = require('modules.character.character_information')
-local character_animation_module = require('modules.character.animation.character_animation')
+local character_info = require("modules.character.character_information")
+local character_state = require("modules.character.character_state")
+local character_looks = require("modules.character.character_looks")
+local character_actions = require("modules.character.character_actions")
+local character_registry = require("modules.character.character_registry")
+local character_animation_module = require("modules.character.animation.character_animation")
 local character_animation = character_animation_module.new()
-local item_definitions = require('modules.utility.item_definitions')
+local character_controller = require("modules.character.character_controller")
+local character_appearance = require("modules.character.character_appearance")
+local item_definitions = require("modules.utility.item_definitions")
 
-go.property("default", resource.tile_source("/assets/characters/walk/character.tilesource"))
-go.property("carry", resource.tile_source("/assets/characters/carrying/character_carry.tilesource"))
-go.property("pickaxe", resource.tile_source("/assets/characters/pickaxe/character_pickaxe.tilesource"))
-go.property("sword", resource.tile_source("/assets/characters/sword/character_sword.tilesource"))
-go.property("axe", resource.tile_source("/assets/characters/axe/character_axe.tilesource"))
-go.property("rod", resource.tile_source("/assets/characters/fishing/character_rod.tilesource"))
-go.property("hoe", resource.tile_source("/assets/characters/hoe/character_hoe.tilesource"))
-go.property("watering", resource.tile_source("/assets/characters/watering/character_watering.tilesource"))
+go.property("is_player", true)
+go.property("randomize_on_init", true)
+go.property("speed", 150)
 
-local speed = 150
-
-local function reset_all_animations(self)
-	local default = self.default
-	if character_info.is_carrying then
-		default = self.carry
+local function idle_action(state)
+	if state.is_carrying then
+		return "carry"
 	end
-
-	local urls = {
-		"shirt#character_shirt",
-		"pants#character_pants",
-		"shoes#character_shoes",
-		"eyes#character_eyes",
-		"hair#character_hair",
-		"body#character_body"
-	}
-	character_animation.reset_animation("#body", default, true)
-	for _, value in pairs(urls) do
-		msg.post(value, "reset_animation");
-	end
+	return "walk"
 end
 
-local function randomize_character(self)
-	math.randomseed(os.time())
-		
-	for index = 1, #character_info.looks.colors, 1 do
-		local max_number = (index == 1) and 7 or 9
-		character_info.looks.colors[index] = math.random(0, max_number)
-	end
+local function tilesource_for(self, action)
+	return self[character_actions.property(action)]
+end
 
-	for index = 1, #character_info.looks.style, 1 do
-		local max_number = 9
-		if index == 2 then
-			max_number = 7
-		elseif index == 3 then
-			max_number = 2
-		end
-		character_info.looks.style[index] = math.random(0, max_number)
+local function facing_from_vector(direction, fallback)
+	if direction.x > 0 then
+		return "right"
+	elseif direction.x < 0 then
+		return "left"
+	elseif direction.y > 0 then
+		return "up"
+	elseif direction.y < 0 then
+		return "down"
 	end
-	
-	if character_info.looks.style[2] == 4 and character_info.looks.colors[2] > 8 then
-		character_info.looks.colors[2] = 8
-		print('Make sure that for sailor bow it cannot exceed 8')
-	end
+	return fallback or "down"
+end
 
-	reset_all_animations(self)
+local function apply_idle(self, reset_layers)
+	local action = idle_action(self.state)
+	character_animation.reset_animation("#body", tilesource_for(self, action))
+	self.current_action = action
+	if reset_layers then
+		character_appearance.reset(self.state.direction)
+	end
+	character_animation.play_animation("#body", nil, self.state)
+end
+
+local function apply_carrying(self, carrying, item_id)
+	self.state.is_carrying = carrying and true or false
+	self.state.carry_item_id = item_id or 0
+	if not self.state.is_carrying then
+		self.state.carry_item_id = 0
+	end
+	msg.post("carry#character_carry", "update_item", { item_id = self.state.carry_item_id })
+	apply_idle(self, true)
+end
+
+local function start_tool_action(self, action)
+	local tilesource = action and self[action]
+	if not tilesource then
+		return false
+	end
+	self.current_action = action
+	if self.state.is_carrying then
+		msg.post("carry#character_carry", "update_item", { item_id = 0 })
+	end
+	character_animation.start_animation("#body", tilesource, self.state)
+	character_appearance.play_action(action, self.state.direction)
+	return true
 end
 
 function init(self)
-    msg.post(".", "acquire_input_focus")
-	self.dir = vmath.vector3()
-	local default = self.default
-	if character_info.is_carrying then
-		default = self.carry
+	if self.is_player then
+		self.state = character_info
+		self.state.is_player = true
+		msg.post(".", "acquire_input_focus")
+	else
+		self.state = character_state.new()
 	end
-	character_animation.reset_animation("#body", default, true)
+	character_registry.register(go.get_id(), self.state)
+	item_definitions.initilize()
 
-	self.animations = {
-		Pickaxe = self.pickaxe,
-		Axe = self.axe,
-		Sword = self.sword,
-		['Fising rod'] = self.rod,
-		Hoe = self.hoe,
-		['Watering can'] = self.watering
-	}
-	
-	randomize_character(self)
+	self.dir = vmath.vector3()
+	self.move_dir = vmath.vector3()
+	self.current_action = "walk"
+
+	if self.randomize_on_init then
+		character_looks.randomize(self.state.looks)
+	end
+	apply_idle(self, true)
+end
+
+function final(self)
+	character_registry.unregister(go.get_id())
 end
 
 function update(self, dt)
-	if character_animation.animation_playing or not character_info.can_move then
+	if character_animation.animation_playing or not self.state.can_move then
 		return
 	end
 
-    if vmath.length_sqr(self.dir) > 1 then
-        self.dir = vmath.normalize(self.dir)
-    end
-
-	local urls = {
-		"shirt#character_shirt",
-		"pants#character_pants",
-		"shoes#character_shoes",
-		"eyes#character_eyes",
-		"hair#character_hair",
-		"body#character_body"
-	}
-
-	if self.dir.x ~= 0 or self.dir.y ~= 0 then
-		local default = self.default
-		if character_info.is_carrying then
-			default = self.carry
-		end
-		character_animation.reset_animation("#body", default, true)
-		for _, value in pairs(urls) do
-			msg.post(value, "reset_animation");
-		end
+	local dir = self.dir
+	if not self.is_player then
+		dir = self.move_dir
 	end
 
-    local p = go.get_position()
-    go.set_position(p + self.dir * speed * dt)
-
-	character_animation.play_animation("#body", self.dir)
-	for _, value in pairs(urls) do
-		msg.post(value, "animate", { direction = self.dir });
+	if vmath.length_sqr(dir) > 1 then
+		dir = vmath.normalize(dir)
 	end
-    
-    self.dir = vmath.vector3()
+
+	if dir.x ~= 0 or dir.y ~= 0 then
+		self.state.direction = facing_from_vector(dir, self.state.direction)
+	end
+
+	local p = go.get_position()
+	go.set_position(p + dir * self.speed * dt)
+
+	character_animation.play_animation("#body", dir, self.state)
+	character_appearance.animate(dir, self.state.direction)
+
+	if self.is_player then
+		self.dir = vmath.vector3()
+	end
 end
 
 function on_input(self, action_id, action)
-
-	if (action_id == hash("gamepad_connected") or action_id == hash("gamepad_disconnected")) and action.gamepad == 0 then
-		character_info.controller_connected = (action_id == hash("gamepad_connected"))
-		print('character_info.controller_connected',character_info.controller_connected)
+	if not self.is_player then
+		return
 	end
 
-	if not character_animation.animation_playing and character_info.can_move then
-		if action_id == hash("down_controller") and action.value > character_info.controller_deadzone then
-			character_info.direction = 'down'
-			self.dir.y = -1
-			character_info.using_controller_settings = true
-		elseif action_id == hash("up_controller") and action.value > character_info.controller_deadzone then
-			character_info.direction = 'up'
-			self.dir.y = 1
-			character_info.using_controller_settings = true
-		elseif action_id == hash("left_controller") and action.value > character_info.controller_deadzone then
-			character_info.direction = 'left'
-			self.dir.x = -1
-			character_info.using_controller_settings = true
-		elseif action_id == hash("right_controller") and action.value > character_info.controller_deadzone then
-			character_info.direction = 'right'
-			self.dir.x = 1
-			character_info.using_controller_settings = true
-		end
+	local result = character_controller.handle_input(self, action_id, action, character_animation.animation_playing, self.state)
+	if not result then
+		return
 	end
 
-	if action_id == hash('perform_action_controller') and action.released then
-		msg.post('inventory_bar_gui#inventory_bar', 'request_selected')
-		character_info.using_controller_settings = true
-	end
-
-	--Handles sending a message to open up the inventory
-	if action_id == hash("inventory_controller") and action.released then
-		msg.post('inventory_gui#inventory', "toggle");
-		character_info.using_controller_settings = true
-	end
-
-	if not character_animation.animation_playing and character_info.can_move then
-		if action_id == hash("down") then
-			character_info.direction = 'down'
-			self.dir.y = -1
-			character_info.using_controller_settings = false
-			character_info.using_controller_settings = false
-		elseif action_id == hash("up") then
-			character_info.direction = 'up'
-			self.dir.y = 1
-			character_info.using_controller_settings = false
-			character_info.using_controller_settings = false
-		elseif action_id == hash("left") then
-			character_info.direction = 'left'
-			self.dir.x = -1
-			character_info.using_controller_settings = false
-		elseif action_id == hash("right") then
-			character_info.direction = 'right'
-			self.dir.x = 1
-			character_info.using_controller_settings = false
-		end
-	end
-
-	if action_id == hash('perform_action') and action.released then
-		msg.post('inventory_bar_gui#inventory_bar', 'request_selected')
-		character_info.using_controller_settings = false
-	end
-
-	--Handles sending a message to open up the inventory
-	if action_id == hash("inventory") and action.released then
-		msg.post('inventory_gui#inventory', "toggle");
-		character_info.using_controller_settings = false
-	end
-
-	--Handles randomizing the character
-	if action_id == hash("randomize") and action.released then
-		msg.post('character_design#character_design', 'toggle')
-		--randomize_character(self)
-		--character_info.using_controller_settings = false
+	if result.perform_action then
+		msg.post("inventory_bar_gui#inventory_bar", "request_selected")
+	elseif result.toggle_inventory then
+		msg.post("inventory_gui#inventory", "toggle")
+	elseif result.toggle_design then
+		msg.post("character_design#character_design", "toggle")
 	end
 end
 
 function on_message(self, message_id, message, sender)
+	message = message or {}
 
-	if message_id == hash('reset_animations') then
-		reset_all_animations(self)
-	elseif message_id == hash('receive_selected') then
-		if character_animation.animation_playing or character_info.is_hovering_gui or not character_info.can_move then
+	if message_id == hash("reset_animations") or message_id == hash("looks_changed") then
+		apply_idle(self, true)
+	elseif message_id == hash("set_looks") then
+		character_looks.apply(self.state.looks, message.looks or message)
+		apply_idle(self, true)
+	elseif message_id == hash("randomize_looks") then
+		character_looks.randomize(self.state.looks)
+		apply_idle(self, true)
+	elseif message_id == hash("set_direction") then
+		if message.direction then
+			self.state.direction = message.direction
+			apply_idle(self, true)
+		end
+	elseif message_id == hash("set_move") then
+		self.move_dir.x = message.x or 0
+		self.move_dir.y = message.y or 0
+		if self.move_dir.x ~= 0 or self.move_dir.y ~= 0 then
+			self.state.direction = facing_from_vector(self.move_dir, self.state.direction)
+		end
+	elseif message_id == hash("set_carrying") then
+		local item_id = message.item_id or 0
+		local carrying = message.carrying
+		if carrying == nil then
+			carrying = item_id ~= 0 and item_id ~= -1
+		end
+		apply_carrying(self, carrying, item_id)
+	elseif message_id == hash("play_action") then
+		local action = message.action
+		if not action and message.item_id then
+			local definition = item_definitions.get(message.item_id)
+			action = definition and definition.action
+		end
+		start_tool_action(self, action)
+	elseif message_id == hash("set_can_move") then
+		self.state.can_move = message.can_move and true or false
+	elseif message_id == hash("receive_selected") then
+		if character_animation.animation_playing or self.state.is_hovering_gui or not self.state.can_move then
 			return
 		end
 
-		local definition = item_definitions.definitions[message.item.id]
+		local item = message.item
+		if not item or item.id == -1 then
+			return
+		end
 
-		character_animation.start_animation("#body", self.animations[definition.name])
+		local definition = item_definitions.get(item.id)
+		start_tool_action(self, definition and definition.action)
+	end
 
-		local urls = {
-			"shirt#character_shirt",
-			"pants#character_pants",
-			"shoes#character_shoes",
-			"eyes#character_eyes",
-			"hair#character_hair",
-			"body#character_body",
-			"tool#character_tool"
-		}
-		for _, value in pairs(urls) do
-			msg.post(value, "animate_character", { name = definition.name });
+	character_animation.on_message(message_id, "#body", tilesource_for(self, idle_action(self.state)), nil, self.state)
+	if message_id == hash("animation_done") then
+		self.current_action = idle_action(self.state)
+		if self.state.is_carrying then
+			msg.post("carry#character_carry", "update_item", { item_id = self.state.carry_item_id })
 		end
 	end
-
-	local default = self.default
-	if character_info.is_carrying then
-		default = self.carry
-	end
-	character_animation.on_message(message_id, "#body", default)
 end

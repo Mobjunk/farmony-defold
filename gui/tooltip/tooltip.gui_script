@@ -31,7 +31,7 @@ function on_message(self, message_id, message, sender)
 		end
 
 		if item_data.id ~= -1 then
-			local definition = item_definitions.definitions[item_data.id]
+			local definition = item_definitions.get(item_data.id)
 			gui.set_text(self.tooltip_name, definition.name)
 			gui.set_text(self.tooltip_type, definition.type)
 			gui.set_text(self.tooltip_description, definition.description)

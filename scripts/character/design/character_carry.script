@@ -1,13 +1,15 @@
-local character_info = require('modules.character.character_information')
+local character_registry = require("modules.character.character_registry")
 
 function init(self)
 end
 
 function on_message(self, message_id, message, sender)
-    if message_id == hash('update_item') then
-        if not character_info.is_carrying then
-            message.item_id = 0
-        end
-        msg.post("#carry", "play_animation", {id = hash('' .. message.item_id)})
-    end
+	if message_id == hash("update_item") then
+		local state = character_registry.parent()
+		local item_id = message.item_id or 0
+		if not state or not state.is_carrying then
+			item_id = 0
+		end
+		msg.post("#carry", "play_animation", { id = hash("" .. item_id) })
+	end
 end

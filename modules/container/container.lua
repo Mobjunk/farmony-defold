@@ -65,7 +65,8 @@ function container.new()
         end
 
         local new_slot = instance.get_free_slot()
-        local stackable = item_definitions.definitions[item_id].stackable
+        local definition = item_definitions.get(item_id)
+        local stackable = definition and definition.stackable
         if (stackable or instance.container_type == instance.stack_types.ALWAYS_STACK) and instance.has_item(item_id, item_amount) then
             print('Get existing slot for ',item_id)
             new_slot = instance.get_slot(item_id)
@@ -124,7 +125,8 @@ function container.new()
 
         local item_data = instance.items[slot]
         local shift_contrainer = false
-        local stackable = item_definitions.definitions[item_id].stackable
+        local definition = item_definitions.get(item_id)
+        local stackable = definition and definition.stackable
         
         if item_data.id == -1 then
             print('There is no item in slot ',slot)
@@ -216,7 +218,8 @@ function container.new()
     function instance.print_container()
         for slot, item in pairs(instance.items) do
             if item.id ~= -1 then
-                print('slot: ' .. slot .. ' name: ' .. item_definitions.definitions[item.id].name .. ' id: ' .. item.id .. ' amount: ' .. item.amount)
+                local definition = item_definitions.get(item.id)
+                print('slot: ' .. slot .. ' name: ' .. (definition and definition.name or "?") .. ' id: ' .. item.id .. ' amount: ' .. item.amount)
             else
                 
                 print('slot: ' .. slot .. ' id: ' .. item.id .. ' amount: ' .. item.amount)

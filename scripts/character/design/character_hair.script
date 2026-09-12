@@ -1,9 +1,4 @@
-local character_info = require('modules.character.character_information')
-local character_looks = require('modules.character.character_looks')
-local character_animation_module = require('modules.character.animation.character_animation')
-local character_animation = character_animation_module.new()
-
-local default_pos
+local character_layer = require("modules.character.character_layer")
 
 go.property("default", resource.tile_source("/assets/characters/walk/hair/buzzcut.tilesource"))
 go.property("braids", resource.tile_source("/assets/characters/walk/hair/braids.tilesource"))
@@ -93,147 +88,15 @@ go.property("midiwave_watering", resource.tile_source("/assets/characters/wateri
 go.property("spacebuns_watering", resource.tile_source("/assets/characters/watering/hair/spacebuns_watering.tilesource"))
 go.property("wavy_watering", resource.tile_source("/assets/characters/watering/hair/wavy_watering.tilesource"))
 
-local function get_hair_style(self)
-    if character_info.is_carrying then
-        local styles = {
-            self.braids_carry,
-            self.curly_carry,
-            self.emo_carry,
-            self.extralong_carry,
-            self.frenchcurl_carry,
-            self.gentleman_carry,
-            self.midiwave_carry,
-            self.spacebuns_carry,
-            self.wavy_carry
-        }
-        return styles[character_looks.style[1]] or self.default_carry
-    else
-        local styles = {
-            self.braids,
-            self.curly,
-            self.emo,
-            self.extralong,
-            self.frenchcurl,
-            self.gentleman,
-            self.midiwave,
-            self.spacebuns,
-            self.wavy
-        }
-        return styles[character_looks.style[1]] or self.default
-    end
-end
-
-local function get_tool_hair_style(self, action)
-    if action == 'Pickaxe' then
-        local styles = {
-            self.braids_pickaxe,
-            self.curly_pickaxe,
-            self.emo_pickaxe,
-            self.extralong_pickaxe,
-            self.frenchcurl_pickaxe,
-            self.gentleman_pickaxe,
-            self.midiwave_pickaxe,
-            self.spacebuns_pickaxe,
-            self.wavy_pickaxe
-        }
-        return styles[character_looks.style[1]] or self.default_pickaxe
-    elseif action == 'Axe' then
-        local styles = {
-            self.braids_axe,
-            self.curly_axe,
-            self.emo_axe,
-            self.extralong_axe,
-            self.frenchcurl_axe,
-            self.gentleman_axe,
-            self.midiwave_axe,
-            self.spacebuns_axe,
-            self.wavy_axe
-        }
-        return styles[character_looks.style[1]] or self.default_axe
-    elseif action == 'Sword' then
-        local styles = {
-            self.braids_sword,
-            self.curly_sword,
-            self.emo_sword,
-            self.extralong_sword,
-            self.frenchcurl_sword,
-            self.gentleman_sword,
-            self.midiwave_sword,
-            self.spacebuns_sword,
-            self.wavy_sword
-        }
-        return styles[character_looks.style[1]] or self.default_sword
-    elseif action == 'Fishing rod' then
-        local styles = {
-            self.braids_rod,
-            self.curly_rod,
-            self.emo_rod,
-            self.extralong_rod,
-            self.frenchcurl_rod,
-            self.gentleman_rod,
-            self.midiwave_rod,
-            self.spacebuns_rod,
-            self.wavy_rod
-        }
-        return styles[character_looks.style[1]] or self.default_rod
-    elseif action == 'Hoe' then
-        local styles = {
-            self.braids_hoe,
-            self.curly_hoe,
-            self.emo_hoe,
-            self.extralong_hoe,
-            self.frenchcurl_hoe,
-            self.gentleman_hoe,
-            self.midiwave_hoe,
-            self.spacebuns_hoe,
-            self.wavy_hoe
-        }
-        return styles[character_looks.style[1]] or self.default_hoe
-    elseif action == 'Watering can' then
-        local styles = {
-            self.braids_watering,
-            self.curly_watering,
-            self.emo_watering,
-            self.extralong_watering,
-            self.frenchcurl_watering,
-            self.gentleman_watering,
-            self.midiwave_watering,
-            self.spacebuns_watering,
-            self.wavy_watering
-        }
-        return styles[character_looks.style[1]] or self.default_watering
-    end
-    return self.default_pickaxe
-end
-
+local layer = character_layer.create({
+	sprite_url = "#hair",
+	style_kind = "hair",
+})
 
 function init(self)
-    default_pos = go.get_position()
-	character_animation.reset_animation("#hair", get_hair_style(self), true)
-
-    self.animations = {
-		Pickaxe = vmath.vector3(0, 0, 0),
-		Axe = vmath.vector3(0, 0, 0),
-		Sword = vmath.vector3(0, 0, 0),
-		['Fising rod'] = vmath.vector3(0, -4, 0),
-		Hoe = vmath.vector3(0, -7, 0),
-		['Watering can'] = vmath.vector3(0, -5, 0)
-	}
+	layer.init(self)
 end
 
 function on_message(self, message_id, message, sender)
-	if message_id == hash('reset_animation') then
-		character_animation.reset_animation("#hair", get_hair_style(self), true)
-	elseif message_id == hash("animate") then
-		character_animation.play_animation("#hair", message.direction)
-	elseif message_id == hash('animate_character') then
-		character_animation.start_animation("#hair", get_tool_hair_style(self, message.name))
-        local position = self.animations[message.name]
-		if message.name == 'Hoe' and character_info.direction ~= 'down' then
-			position = vmath.vector3(0, -1, 0)
-		end
-		go.set_position(position)
-	end
-
-	character_animation.on_message(message_id, "#hair", get_hair_style(self), default_pos)
+	layer.on_message(self, message_id, message)
 end

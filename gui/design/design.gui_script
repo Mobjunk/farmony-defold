@@ -1,331 +1,249 @@
-local auto_layout = require('modules.utility.auto_layout')
-local character_info = require('modules.character.character_information')
-local navigation = require('modules.utility.navigation')
+local auto_layout = require("modules.utility.auto_layout")
+local character_info = require("modules.character.character_information")
+local character_looks = require("modules.character.character_looks")
+local navigation = require("modules.utility.navigation")
 
-local selected_input_field_text = ''
+local selected_input_field = ""
+local selected_input_field_text = ""
 
-local rotations = { "down", "right", "up", "left" }
 local rotation_index = 1
-
 local background_index = 1
 local max_background_index = 8
-
-local hair_cuts = { "buzzcut", "braids", "curly", "emo", "extralong", "frenchcurl", "gentleman", "midiwave", "spacebuns", "wavy" }
-local hair_style = 0
-local max_hair_style = 9
-
 local beard_style = 0
 local max_beard_style = 0
+local looks_snapshot
 
-local shirts = { "basic", "floral", "overall", "sailor", "sailor_bow", "sporty", "suit" }
-local shirt_style = 0
-local max_shirt_style = 6
+local function player_looks()
+	return character_info.looks
+end
 
-local pants = { "pants", "pants_suit", "skirt" }
-local pants_style = 0
-local max_pants_style = 2
+local function wrap_index(index, count)
+	if index < 1 then
+		return count
+	elseif index > count then
+		return 1
+	end
+	return index
+end
 
-local shoes_color = 0
-local max_shoes_color = 9
+local function preview()
+	local looks = player_looks()
+	local dir = character_looks.DIRECTIONS[rotation_index]
+	gui.play_flipbook(gui.get_node("character_body"), "idle_" .. dir .. "_" .. looks.skin_color)
 
-local skin_color = 0
-local max_skin_color = 7
+	gui.set_texture(gui.get_node("character_hair"), looks.hair.style)
+	gui.play_flipbook(gui.get_node("character_hair"), "idle_" .. dir .. "_" .. looks.hair.color)
 
-local hair_color = 0
-local max_hair_color = 9
+	gui.set_texture(gui.get_node("character_shirt"), looks.shirt.style)
+	gui.play_flipbook(gui.get_node("character_shirt"), "idle_" .. dir .. "_" .. looks.shirt.color)
 
-local shirt_color = 0
-local max_shirt_color = 9
+	gui.set_texture(gui.get_node("character_pants"), looks.pants.style)
+	gui.play_flipbook(gui.get_node("character_pants"), "idle_" .. dir .. "_" .. looks.pants.color)
 
-local pants_color = 0
-local max_pants_color = 9
+	gui.play_flipbook(gui.get_node("character_shoes"), "idle_" .. dir .. "_" .. looks.shoes_color)
+	gui.play_flipbook(gui.get_node("character_eyes"), "idle_" .. dir .. "_" .. looks.eyes_color)
+end
 
-local eye_color = 0
-local max_eye_color = 9
+local function notify_character()
+	msg.post("character#character", "looks_changed")
+end
+
+local function close_design(apply)
+	gui.set_enabled(gui.get_node("root"), false)
+	if not apply and looks_snapshot then
+		character_looks.apply(player_looks(), looks_snapshot)
+	end
+	looks_snapshot = nil
+	character_info.can_move = true
+	notify_character()
+end
+
+local function open_design()
+	looks_snapshot = character_looks.snapshot(player_looks())
+	gui.set_enabled(gui.get_node("root"), true)
+	navigation.set_selected("arrow_rotate_left")
+	character_info.can_move = false
+	preview()
+end
 
 local function rotate_player(value)
-	print('rotate_player',value)
-	rotation_index = rotation_index + value
-	if rotation_index < 1 then
-		rotation_index = #rotations
-	elseif rotation_index > #rotations then
-		rotation_index = 1
-	end
-	print('self.rotation_index',rotation_index)
-	gui.play_flipbook(gui.get_node('character_body'), 'idle_' .. rotations[rotation_index] .. '_' .. skin_color)
-	gui.play_flipbook(gui.get_node('character_hair'), 'idle_' .. rotations[rotation_index] .. '_' .. hair_color)
-	gui.play_flipbook(gui.get_node('character_shirt'), 'idle_' .. rotations[rotation_index] .. '_' .. shirt_color)
-	gui.play_flipbook(gui.get_node('character_pants'), 'idle_' .. rotations[rotation_index] .. '_' .. pants_color)
-	gui.play_flipbook(gui.get_node('character_shoes'), 'idle_' .. rotations[rotation_index] .. '_' .. shoes_color)
-	gui.play_flipbook(gui.get_node('character_eyes'), 'idle_' .. rotations[rotation_index] .. '_' .. eye_color)
+	rotation_index = wrap_index(rotation_index + value, #character_looks.DIRECTIONS)
+	preview()
 end
 
 local function swap_background(value)
-	print('swap_background',value)
-	background_index = background_index + value
-	if background_index < 1 then
-		background_index = max_background_index
-	elseif background_index > max_background_index then
-		background_index = 1
-	end
-	print('self.background_index',background_index)
-	gui.play_flipbook(gui.get_node('character_background'), '' .. background_index)
+	background_index = wrap_index(background_index + value, max_background_index)
+	gui.play_flipbook(gui.get_node("character_background"), "" .. background_index)
 end
 
-local function open_name(self)
-	print('open_name')
-	msg.post('virtual_keyboard#virtual_keyboard', 'toggle', { url = 'character_design#character_design' })
-	selected_input_field = 'name_input_field'
-	selected_input_field_text = 'name_input_entry'
+local function open_name()
+	msg.post("virtual_keyboard#virtual_keyboard", "toggle", { url = "character_design#character_design" })
+	selected_input_field = "name_input_field"
+	selected_input_field_text = "name_input_entry"
 end
 
 local function open_farm_name()
-	print('open_farm_name')
-	msg.post('virtual_keyboard#virtual_keyboard', 'toggle', { url = 'character_design#character_design' })
-	selected_input_field = 'farm_name_input_field'
-	selected_input_field_text = 'farm_name_input_entry'
+	msg.post("virtual_keyboard#virtual_keyboard", "toggle", { url = "character_design#character_design" })
+	selected_input_field = "farm_name_input_field"
+	selected_input_field_text = "farm_name_input_entry"
 end
 
 local function open_fav_thing()
-	print('open_fav_thing')
-	msg.post('virtual_keyboard#virtual_keyboard', 'toggle', { url = 'character_design#character_design' })
-	selected_input_field = 'favorite_thing_input_field'
-	selected_input_field_text = 'favorite_thing_input_entry'
+	msg.post("virtual_keyboard#virtual_keyboard", "toggle", { url = "character_design#character_design" })
+	selected_input_field = "favorite_thing_input_field"
+	selected_input_field_text = "favorite_thing_input_entry"
 end
 
 local function swap_hair(value)
-	print('swap_hair',value)
-	hair_style = hair_style + value
-	if hair_style < 0 then
-		hair_style = max_hair_style
-	elseif hair_style > max_hair_style then
-		hair_style = 0
-	end
-	print('self.hair_style',hair_style)
-	gui.set_texture(gui.get_node('character_hair'), hair_cuts[hair_style + 1])
-	gui.play_flipbook(gui.get_node('character_hair'), 'idle_' .. rotations[rotation_index] .. '_' .. hair_color)
+	character_looks.cycle_hair_style(player_looks(), value)
+	preview()
 end
 
 local function swap_beard(value)
-	print('swap_beard',value)
 	beard_style = beard_style + value
 	if beard_style < 0 then
 		beard_style = max_beard_style
 	elseif beard_style > max_beard_style then
 		beard_style = 0
 	end
-	print('self.beard_style',beard_style)
 end
 
 local function swap_shirt(value)
-	print('swap_shirt',value)
-	shirt_style = shirt_style + value
-	if shirt_style < 0 then
-		shirt_style = max_shirt_style
-	elseif shirt_style > max_shirt_style then
-		shirt_style = 0
-	end
-	print('self.shirt_style',shirt_style)
-	gui.set_texture(gui.get_node('character_shirt'), shirts[shirt_style + 1])
-	gui.play_flipbook(gui.get_node('character_shirt'), 'idle_' .. rotations[rotation_index] .. '_' .. shirt_color)
+	character_looks.cycle_shirt_style(player_looks(), value)
+	preview()
 end
 
 local function swap_pants(value)
-	print('swap_pants',value)
-	pants_style = pants_style + value
-	if pants_style < 0 then
-		pants_style = max_pants_style
-	elseif pants_style > max_pants_style then
-		pants_style = 0
-	end
-	print('self.pants_style',pants_style)
-	gui.set_texture(gui.get_node('character_pants'), pants[pants_style + 1])
-	gui.play_flipbook(gui.get_node('character_pants'), 'idle_' .. rotations[rotation_index] .. '_' .. pants_color)
+	character_looks.cycle_pants_style(player_looks(), value)
+	preview()
 end
 
 local function swap_shoes(value)
-	print('swap_shoes',value)
-	shoes_color = shoes_color + value
-	if shoes_color < 0 then
-		shoes_color = max_shoes_color
-	elseif shoes_color > max_shoes_color then
-		shoes_color = 0
-	end
-	print('self.shoes_color',shoes_color)
-	gui.play_flipbook(gui.get_node('character_shoes'), 'idle_' .. rotations[rotation_index] .. '_' .. shoes_color)
+	character_looks.cycle_shoes_color(player_looks(), value)
+	preview()
 end
 
 local function swap_skin(value)
-	print('swap_skin',value)
-	skin_color = skin_color + value
-	if skin_color < 0 then
-		skin_color = max_skin_color
-	elseif skin_color > max_skin_color then
-		skin_color = 0
-	end
-	print('self.skin_color',skin_color)
-	gui.play_flipbook(gui.get_node('character_body'), 'idle_' .. rotations[rotation_index] .. '_' .. skin_color)
+	character_looks.cycle_skin_color(player_looks(), value)
+	preview()
 end
 
 local function swap_hair_color(value)
-	print('swap_hair_color',value)
-	hair_color = hair_color + value
-	if hair_color < 0 then
-		hair_color = max_hair_color
-	elseif hair_color > max_hair_color then
-		hair_color = 0
-	end
-	print('self.hair_color',hair_color)
-	gui.play_flipbook(gui.get_node('character_hair'), 'idle_' .. rotations[rotation_index] .. '_' .. hair_color)
+	character_looks.cycle_hair_color(player_looks(), value)
+	preview()
 end
 
 local function swap_shirt_color(value)
-	print('swap_shirt_color',value)
-	shirt_color = shirt_color + value
-	if shirt_color < 0 then
-		shirt_color = max_shirt_color
-	elseif shirt_color > max_shirt_color then
-		shirt_color = 0
-	end
-	print('self.shirt_color',shirt_color)
-	gui.play_flipbook(gui.get_node('character_shirt'), 'idle_' .. rotations[rotation_index] .. '_' .. shirt_color)
+	character_looks.cycle_shirt_color(player_looks(), value)
+	preview()
 end
 
 local function swap_pants_color(value)
-	print('swap_pants_color',value)
-	pants_color = pants_color + value
-	if pants_color < 0 then
-		pants_color = max_pants_color
-	elseif pants_color > max_pants_color then
-		pants_color = 0
-	end
-	print('self.pants_color',pants_color)
-	gui.play_flipbook(gui.get_node('character_pants'), 'idle_' .. rotations[rotation_index] .. '_' .. pants_color)
+	character_looks.cycle_pants_color(player_looks(), value)
+	preview()
 end
 
 local function swap_eye_color(value)
-	print('swap_eye_color',value)
-	eye_color = eye_color + value
-	if eye_color < 0 then
-		eye_color = max_eye_color
-	elseif eye_color > max_eye_color then
-		eye_color = 0
-	end
-	print('self.eye_color',eye_color)
-	gui.play_flipbook(gui.get_node('character_eyes'), 'idle_' .. rotations[rotation_index] .. '_' .. eye_color)
+	character_looks.cycle_eyes_color(player_looks(), value)
+	preview()
 end
 
 local function start()
-	print('start')
+	close_design(true)
 end
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
-	print('url design',msg.url())
 
-	gui.play_flipbook(gui.get_node('character_body'), 'idle_' .. rotations[rotation_index] .. '_' .. skin_color)
-
-	gui.set_texture(gui.get_node('character_hair'), hair_cuts[hair_style + 1])
-	gui.play_flipbook(gui.get_node('character_hair'), 'idle_' .. rotations[rotation_index] .. '_' .. hair_color)
-
-	gui.set_texture(gui.get_node('character_shirt'), shirts[shirt_style + 1])
-	gui.play_flipbook(gui.get_node('character_shirt'), 'idle_' .. rotations[rotation_index] .. '_' .. shirt_color)
-
-	gui.set_texture(gui.get_node('character_pants'), pants[pants_style + 1])
-	gui.play_flipbook(gui.get_node('character_pants'), 'idle_' .. rotations[rotation_index] .. '_' .. pants_color)
-
-	gui.play_flipbook(gui.get_node('character_shoes'), 'idle_' .. rotations[rotation_index] .. '_' .. shoes_color)
-	gui.play_flipbook(gui.get_node('character_eyes'), 'idle_' .. rotations[rotation_index] .. '_' .. eye_color)
-
-	self.character_design = gui.get_node('root')
-
+	self.character_design = gui.get_node("root")
 	self.navigation_buttons = {}
-	--navigation.set_selected('arrow_rotate_left')
 
-	auto_layout.setup_layout('vertical', { 'name_content', 'farm_name_content', 'favorite_thing_content' }, 6.5, '', '')
-	auto_layout.setup_layout('vertical', { 'hair_content', 'beard_content', 'shirt_content', 'pants_content', 'shoes_content' }, 0, '', '')
-	auto_layout.setup_layout('vertical', { 'skin_content', 'hair_color_content', 'shirt_color_content', 'pants_color_content', 'eyes_content' }, 0, '', '')
+	preview()
 
-	navigation.add_focusable(self, 'arrow_rotate_left', function ()
+	auto_layout.setup_layout("vertical", { "name_content", "farm_name_content", "favorite_thing_content" }, 6.5, "", "")
+	auto_layout.setup_layout("vertical", { "hair_content", "beard_content", "shirt_content", "pants_content", "shoes_content" }, 0, "", "")
+	auto_layout.setup_layout("vertical", { "skin_content", "hair_color_content", "shirt_color_content", "pants_color_content", "eyes_content" }, 0, "", "")
+
+	navigation.add_focusable(self, "arrow_rotate_left", function()
 		rotate_player(-1)
 	end)
-	navigation.add_focusable(self, 'arrow_rotate_right', function ()
+	navigation.add_focusable(self, "arrow_rotate_right", function()
 		rotate_player(1)
 	end)
-	navigation.add_focusable(self, 'arrow_background_left', function ()
+	navigation.add_focusable(self, "arrow_background_left", function()
 		swap_background(-1)
 	end)
-	navigation.add_focusable(self, 'arrow_background_right', function ()
+	navigation.add_focusable(self, "arrow_background_right", function()
 		swap_background(1)
 	end)
 
-	navigation.add_focusable(self, 'name_input_field', open_name)
-	navigation.add_focusable(self, 'farm_name_input_field', open_farm_name)
-	navigation.add_focusable(self, 'favorite_thing_input_field', open_fav_thing)
+	navigation.add_focusable(self, "name_input_field", open_name)
+	navigation.add_focusable(self, "farm_name_input_field", open_farm_name)
+	navigation.add_focusable(self, "favorite_thing_input_field", open_fav_thing)
 
-	navigation.add_focusable(self, 'hair_left_arrow', function ()
+	navigation.add_focusable(self, "hair_left_arrow", function()
 		swap_hair(-1)
 	end)
-	navigation.add_focusable(self, 'hair_right_arrow', function ()
-		swap_hair(-1)
+	navigation.add_focusable(self, "hair_right_arrow", function()
+		swap_hair(1)
 	end)
-	navigation.add_focusable(self, 'beard_left_arrow', function ()
+	navigation.add_focusable(self, "beard_left_arrow", function()
 		swap_beard(-1)
 	end)
-	navigation.add_focusable(self, 'beard_right_arrow', function ()
-		swap_beard(-1)
+	navigation.add_focusable(self, "beard_right_arrow", function()
+		swap_beard(1)
 	end)
-	navigation.add_focusable(self, 'shirt_left_arrow', function ()
+	navigation.add_focusable(self, "shirt_left_arrow", function()
 		swap_shirt(-1)
 	end)
-	navigation.add_focusable(self, 'shirt_right_arrow', function ()
+	navigation.add_focusable(self, "shirt_right_arrow", function()
 		swap_shirt(1)
 	end)
-	navigation.add_focusable(self, 'pants_left_arrow', function ()
+	navigation.add_focusable(self, "pants_left_arrow", function()
 		swap_pants(-1)
 	end)
-	navigation.add_focusable(self, 'pants_right_arrow', function ()
+	navigation.add_focusable(self, "pants_right_arrow", function()
 		swap_pants(1)
 	end)
-	navigation.add_focusable(self, 'shoes_left_arrow', function ()
+	navigation.add_focusable(self, "shoes_left_arrow", function()
 		swap_shoes(-1)
 	end)
-	navigation.add_focusable(self, 'shoes_right_arrow', function ()
+	navigation.add_focusable(self, "shoes_right_arrow", function()
 		swap_shoes(1)
 	end)
 
-	navigation.add_focusable(self, 'skin_left_arrow', function ()
+	navigation.add_focusable(self, "skin_left_arrow", function()
 		swap_skin(-1)
 	end)
-	navigation.add_focusable(self, 'skin_right_arrow', function ()
+	navigation.add_focusable(self, "skin_right_arrow", function()
 		swap_skin(1)
 	end)
-	navigation.add_focusable(self, 'hair_color_left_arrow', function ()
+	navigation.add_focusable(self, "hair_color_left_arrow", function()
 		swap_hair_color(-1)
 	end)
-	navigation.add_focusable(self, 'hair_color_right_arrow', function ()
+	navigation.add_focusable(self, "hair_color_right_arrow", function()
 		swap_hair_color(1)
 	end)
-	navigation.add_focusable(self, 'shirt_color_left_arrow', function ()
+	navigation.add_focusable(self, "shirt_color_left_arrow", function()
 		swap_shirt_color(-1)
 	end)
-	navigation.add_focusable(self, 'shirt_color_right_arrow', function ()
+	navigation.add_focusable(self, "shirt_color_right_arrow", function()
 		swap_shirt_color(1)
 	end)
-	navigation.add_focusable(self, 'pants_color_left_arrow', function ()
+	navigation.add_focusable(self, "pants_color_left_arrow", function()
 		swap_pants_color(-1)
 	end)
-	navigation.add_focusable(self, 'pants_color_right_arrow', function ()
+	navigation.add_focusable(self, "pants_color_right_arrow", function()
 		swap_pants_color(1)
 	end)
-	navigation.add_focusable(self, 'eye_color_left_arrow', function ()
+	navigation.add_focusable(self, "eye_color_left_arrow", function()
 		swap_eye_color(-1)
 	end)
-	navigation.add_focusable(self, 'eye_color_right_arrow', function ()
+	navigation.add_focusable(self, "eye_color_right_arrow", function()
 		swap_eye_color(1)
 	end)
 
-	navigation.add_focusable(self, 'start_button', start)
+	navigation.add_focusable(self, "start_button", start)
 end
 
 function final(self)
@@ -336,19 +254,17 @@ function update(self, dt)
 end
 
 function on_message(self, message_id, message, sender)
-	if message_id == hash('toggle') then
+	if message_id == hash("toggle") then
 		if not gui.is_enabled(self.character_design, false) then
-			gui.set_enabled(self.character_design, true)
-			navigation.set_selected('arrow_rotate_left')
-			character_info.can_move = false
+			open_design()
 		else
-			gui.set_enabled(self.character_design, false)
+			close_design(false)
 		end
-	elseif message_id == hash('finished_typing') then
+	elseif message_id == hash("finished_typing") then
 		gui.set_text(gui.get_node(selected_input_field_text), message.message)
 		navigation.set_selected(selected_input_field)
-		selected_input_field = ''
-		selected_input_field_text = ''
+		selected_input_field = ""
+		selected_input_field_text = ""
 	end
 end
 

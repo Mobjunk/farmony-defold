@@ -1,18 +1,18 @@
 key_trigger {
   input: KEY_DOWN
-  action: "down1"
+  action: "down"
 }
 key_trigger {
   input: KEY_UP
-  action: "up1"
+  action: "up"
 }
 key_trigger {
   input: KEY_LEFT
-  action: "left1"
+  action: "left"
 }
 key_trigger {
   input: KEY_RIGHT
-  action: "right1"
+  action: "right"
 }
 key_trigger {
   input: KEY_1
@@ -60,23 +60,23 @@ key_trigger {
 }
 key_trigger {
   input: KEY_E
-  action: "inventory1"
+  action: "inventory"
 }
 key_trigger {
   input: KEY_W
-  action: "up1"
+  action: "up"
 }
 key_trigger {
   input: KEY_A
-  action: "left1"
+  action: "left"
 }
 key_trigger {
   input: KEY_S
-  action: "down1"
+  action: "down"
 }
 key_trigger {
   input: KEY_D
-  action: "right1"
+  action: "right"
 }
 mouse_trigger {
   input: MOUSE_BUTTON_1

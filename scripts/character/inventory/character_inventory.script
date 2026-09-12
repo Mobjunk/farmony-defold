@@ -1,18 +1,35 @@
-local item_definitions = require('modules.utility.item_definitions')
-local character_info = require('modules.character.character_information')
-local container_module = require('modules.container.container')
+local item_definitions = require("modules.utility.item_definitions")
+local character_registry = require("modules.character.character_registry")
+local container_module = require("modules.container.container")
 local container = container_module.new()
-local item_snapper = require('modules.utility.item_snapper')
+local item_snapper = require("modules.utility.item_snapper")
 
 local function container_updated()
 	local data = container.get_updated_items()
-	msg.post('inventory_bar_gui#inventory_bar', 'update_container', { items = data })
-	msg.post('inventory_gui#inventory', 'update_container', { items = data })
+	msg.post("inventory_bar_gui#inventory_bar", "update_container", { items = data })
+	msg.post("inventory_gui#inventory", "update_container", { items = data })
+end
+
+local function apply_selected_item(slot)
+	local state = character_registry.mine()
+	if not state then
+		return
+	end
+	local item = container.items[slot]
+	local item_id = item and item.id or -1
+	state.is_carrying = item_definitions.is_carried(item_id)
+	state.carry_item_id = state.is_carrying and item_id or 0
+	msg.post("carry#character_carry", "update_item", { item_id = state.carry_item_id })
+	msg.post("#character", "reset_animations")
 end
 
 function init(self)
 	item_definitions.initilize()
 	container.initilize(36, container.stack_types.STANDARD, false, container_updated)
+	local state = character_registry.mine()
+	if state and not state.is_player then
+		return
+	end
 	container.add(1)
 	container.add(2)
 	container.add(3)
@@ -21,43 +38,27 @@ function init(self)
 end
 
 function on_message(self, message_id, message, sender)
-	if message_id == hash('add') then
+	if message_id == hash("add") then
 		message.item_amount = message.item_amount or 1
 		container.add(message.item_id, message.item_amount)
-	elseif message_id == hash('remove') then
+	elseif message_id == hash("remove") then
 		message.item_amount = message.item_amount or 1
 		message.allow_zero = message.allow_zero or false
 		message.prefered_slot = message.prefered_slot or -1
 		container.remove(message.item_id, message.item_amount, message.allow_zero, message.prefered_slot)
-	elseif message_id == hash('hovering_item') then
-		msg.post('tooltip_gui#tooltip', 'tooltip', { item = container.items[message.slot], mouse_x = message.mouse_x, mouse_y = message.mouse_y })
-	elseif message_id == hash('scroll_up') then
+	elseif message_id == hash("hovering_item") then
+		msg.post("tooltip_gui#tooltip", "tooltip", { item = container.items[message.slot], mouse_x = message.mouse_x, mouse_y = message.mouse_y })
+	elseif message_id == hash("scroll_up") then
 		local next_slot = container.get_next_occupied_slot(message.current_slot, true)
-		local definition = item_definitions.definitions[container.items[next_slot].id]
-
-		character_info.is_carrying = definition.type == 'Object' or definition.type == 'Seed'
-
-		msg.post('carry#character_carry', 'update_item', { item_id = container.items[next_slot].id })
-		msg.post('character#character', "reset_animations")
-		msg.post('inventory_bar_gui#inventory_bar', 'selected_slot', { slot =  next_slot})
-	elseif message_id == hash('scroll_down') then
+		apply_selected_item(next_slot)
+		msg.post("inventory_bar_gui#inventory_bar", "selected_slot", { slot = next_slot })
+	elseif message_id == hash("scroll_down") then
 		local next_slot = container.get_next_occupied_slot(message.current_slot, false)
-		local definition = item_definitions.definitions[container.items[next_slot].id]
-
-		character_info.is_carrying = definition.type == 'Object' or definition.type == 'Seed'
-
-		msg.post('carry#character_carry', 'update_item', { item_id = container.items[next_slot].id })
-		msg.post('character#character', "reset_animations")
-		msg.post('inventory_bar_gui#inventory_bar', 'selected_slot', { slot = next_slot })
-	elseif message_id == hash('slot_swapped') then
-		local definition = item_definitions.definitions[container.items[message.slot].id]
-
-		character_info.is_carrying = definition.type == 'Object' or definition.type == 'Seed'
-
-		msg.post('carry#character_carry', 'update_item', { item_id = container.items[message.slot].id })
-		msg.post('character#character', "reset_animations")
-	elseif message_id == hash('item_snap') then
-
+		apply_selected_item(next_slot)
+		msg.post("inventory_bar_gui#inventory_bar", "selected_slot", { slot = next_slot })
+	elseif message_id == hash("slot_swapped") then
+		apply_selected_item(message.slot)
+	elseif message_id == hash("item_snap") then
 		if container.items[message.slot].id == -1 then
 			return
 		end
@@ -70,9 +71,9 @@ function on_message(self, message_id, message, sender)
 			durability = -1,
 			max_durability = -1
 		}, true)
-		msg.post('tooltip_gui#tooltip', 'reset_tooltip')
-		msg.post('item_snapper_gui#item_snapper', 'snap', { x = message.x, y = message.y })
-	elseif message_id == hash('item_swap') then
+		msg.post("tooltip_gui#tooltip", "reset_tooltip")
+		msg.post("item_snapper_gui#item_snapper", "snap", { x = message.x, y = message.y })
+	elseif message_id == hash("item_swap") then
 		local item_data = container.items[message.slot]
 		if item_data.id == -1 then
 			container.set(message.slot, item_snapper.selected_item, true)
@@ -82,9 +83,9 @@ function on_message(self, message_id, message, sender)
 		end
 		item_snapper.selected_item = nil
 		item_snapper.selected_slot = -1
-		msg.post('tooltip_gui#tooltip', 'reset_tooltip')
-		msg.post('item_snapper_gui#item_snapper', 'reset')
-	elseif message_id == hash('send_selected') then
-		msg.post('character#character', 'receive_selected', { item = container.items[message.slot] })
+		msg.post("tooltip_gui#tooltip", "reset_tooltip")
+		msg.post("item_snapper_gui#item_snapper", "reset")
+	elseif message_id == hash("send_selected") then
+		msg.post("#character", "receive_selected", { item = container.items[message.slot] })
 	end
 end
